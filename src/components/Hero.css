@@ -1,0 +1,485 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  padding: 126px 0 30px;
+}
+
+/* drifting gradient mesh behind the hero */
+.mesh {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--hx);
+  transition: background-color 0.4s;
+}
+.mesh i {
+  position: absolute;
+  display: block;
+  will-change: transform;
+  animation: 28s ease-in-out infinite alternate;
+}
+.mesh .m1 {
+  left: -14%;
+  top: -46%;
+  width: 84%;
+  height: 118%;
+  animation-name: dA;
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--ca), var(--aa)),
+    rgba(var(--ca), calc(var(--aa) * 0.72)) 38%,
+    rgba(var(--ca), calc(var(--aa) * 0.26)) 70%,
+    rgba(var(--ca), 0)
+  );
+}
+.mesh .m2 {
+  left: 44%;
+  top: -16%;
+  width: 74%;
+  height: 94%;
+  transform: rotate(-22deg);
+  animation-name: dB;
+  animation-duration: 33s;
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--cb), var(--ab)),
+    rgba(var(--cb), calc(var(--ab) * 0.7)) 36%,
+    rgba(var(--cb), calc(var(--ab) * 0.24)) 70%,
+    rgba(var(--cb), 0)
+  );
+}
+.mesh .m3 {
+  left: 63%;
+  top: 28%;
+  width: 52%;
+  height: 72%;
+  animation-name: dC;
+  animation-duration: 23s;
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--cc), var(--ac)),
+    rgba(var(--cc), calc(var(--ac) * 0.66)) 34%,
+    rgba(var(--cc), calc(var(--ac) * 0.2)) 68%,
+    rgba(var(--cc), 0)
+  );
+}
+.mesh .m4 {
+  left: -26%;
+  top: 38%;
+  width: 90%;
+  height: 104%;
+  animation-name: dD;
+  animation-duration: 31s;
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--cd), var(--ad)),
+    rgba(var(--cd), calc(var(--ad) * 0.8)) 40%,
+    rgba(var(--cd), calc(var(--ad) * 0.3)) 72%,
+    rgba(var(--cd), 0)
+  );
+}
+.mesh .m5 {
+  left: 50%;
+  top: 38%;
+  width: 50%;
+  height: 72%;
+  animation-name: dE;
+  animation-duration: 37s;
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--ce), var(--ae)),
+    rgba(var(--ce), calc(var(--ae) * 0.6)) 40%,
+    rgba(var(--ce), 0)
+  );
+}
+@keyframes dA {
+  to {
+    transform: translate3d(9%, 7%, 0) scale(1.1);
+  }
+}
+@keyframes dB {
+  to {
+    transform: translate3d(-8%, 9%, 0) rotate(-32deg) scale(0.94);
+  }
+}
+@keyframes dC {
+  to {
+    transform: translate3d(-8%, -10%, 0) scale(1.16);
+  }
+}
+@keyframes dD {
+  to {
+    transform: translate3d(8%, -6%, 0) scale(1.08);
+  }
+}
+@keyframes dE {
+  to {
+    transform: translate3d(-12%, -6%, 0) scale(1.1);
+  }
+}
+.veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--veil) 0, transparent 18%, transparent 64%, var(--bg) 100%);
+}
+
+.hero-in {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 520px;
+  gap: 20px;
+  align-items: center;
+}
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+  margin-bottom: 26px;
+}
+.kicker::before {
+  content: '';
+  width: 44px;
+  height: 1px;
+  background: var(--fg);
+}
+.hero h1 {
+  font-weight: 300;
+  font-size: clamp(34px, 4.6vw, 64px);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+}
+.hero h1 b {
+  font-weight: 700;
+}
+.h1a {
+  display: block;
+}
+
+/* the giant outlined "ECEH": the mesh rises inside the letters on hover */
+.eceh {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 16px;
+  overflow: visible;
+  filter: var(--eglow);
+}
+.et {
+  font: 800 200px var(--font-sans);
+  letter-spacing: -0.02em;
+}
+.e-out {
+  fill: none;
+  stroke: var(--e-line);
+  stroke-width: 1.8;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+}
+.e-rise {
+  transform: translateY(330px);
+  transition: transform 1.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.eceh:hover .e-rise {
+  transform: none;
+}
+
+.intro {
+  margin-top: 38px;
+  font-size: 19px;
+  line-height: 1.62;
+  color: var(--fg-2);
+  max-width: 60ch;
+}
+.ctas {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin-top: 32px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  height: 54px;
+  padding: 0 24px 0 28px;
+  border-radius: 999px;
+  background: var(--inv);
+  color: var(--on-inv);
+  font-weight: 600;
+  font-size: 16px;
+  transition: box-shadow 0.3s;
+}
+.btn:hover {
+  box-shadow:
+    0 0 0 4px var(--hx),
+    0 0 0 5px var(--line-3);
+}
+.btn .i {
+  transition: transform 0.3s;
+}
+.btn:hover .i {
+  transform: translateY(2px);
+}
+.lnk {
+  font-weight: 600;
+  font-size: 16px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line-3);
+}
+.lnk.u::after {
+  bottom: -2px;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 54px;
+  border-top: 1px solid var(--line-2);
+}
+.facts > div {
+  padding: 22px 24px 6px 0;
+}
+.facts > div + div {
+  padding-left: 24px;
+  border-left: 1px solid var(--line);
+}
+.facts dt {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  margin-bottom: 8px;
+}
+.facts dd {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* 3D sprint stack: line art in the logo's sheet geometry */
+.scene {
+  position: relative;
+  height: 560px;
+}
+.stage {
+  position: absolute;
+  inset: 0;
+}
+.stack {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 340px;
+  height: 360px;
+  margin: -180px 0 0 -170px;
+  transform: translateY(62px) rotateX(55deg) rotateZ(-45deg);
+  transform-style: preserve-3d;
+  transition: --gap 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: settle 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s backwards;
+}
+.scene:hover .stack,
+.scene:focus-within .stack {
+  --gap: 46px;
+}
+@keyframes settle {
+  from {
+    --gap: 72px;
+  }
+}
+.sh,
+.floor {
+  position: absolute;
+  inset: 0;
+}
+.sh {
+  transform: translateZ(calc(var(--i) * var(--gap)));
+}
+.sh > svg,
+.floor > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.sh > svg {
+  filter: var(--sh-glow);
+}
+.sh use {
+  fill: var(--sh-fill);
+  stroke: var(--sh-line);
+  stroke-width: 1.4;
+  stroke-opacity: var(--o, 1);
+  stroke-linejoin: round;
+}
+.sh-l {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--gap);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 68px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--fg-2);
+  opacity: calc(var(--o) + 0.25);
+}
+.sh-l::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+}
+.floor {
+  transform: translateZ(-18px);
+}
+.floor::before {
+  content: '';
+  position: absolute;
+  inset: -22%;
+  background: radial-gradient(closest-side, var(--fl), transparent);
+}
+.floor use {
+  fill: none;
+  stroke: var(--fg-3);
+  stroke-width: 1;
+  stroke-dasharray: 3 6;
+}
+.sh.top {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 30px 34px;
+  color: var(--fg);
+}
+.sh.top use {
+  fill: var(--sh-top);
+  stroke-width: 1.8;
+}
+.sh.top > span {
+  position: relative;
+}
+.tp-k {
+  font-size: 11.5px;
+  color: var(--fg-2);
+}
+.sh.top .live,
+.sh.top .chip {
+  margin-top: 12px;
+  align-self: flex-start;
+}
+.tp-t {
+  margin-top: auto;
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.tp-d {
+  margin-top: 12px;
+  font-size: 15.5px;
+  line-height: 1.45;
+  color: var(--fg-2);
+}
+.tp-f {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+}
+.tp-f .mono {
+  font-size: 12px;
+}
+
+@media (max-width: 1180px) {
+  .hero-in {
+    grid-template-columns: minmax(0, 1fr) 440px;
+  }
+  .scene {
+    height: 500px;
+  }
+  .stage {
+    transform: scale(0.86);
+  }
+}
+@media (max-width: 960px) {
+  .hero-in {
+    grid-template-columns: 1fr;
+  }
+  /* single column: the stack sits under the buttons, shifted down so its
+     raised top sheets do not cover them */
+  .scene {
+    height: 540px;
+    margin-top: 36px;
+  }
+  .stage {
+    transform: translateY(56px);
+  }
+}
+@media (max-width: 760px) {
+  .hero {
+    padding-top: 118px;
+  }
+  .kicker {
+    font-size: 10.5px;
+    letter-spacing: 0.13em;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .kicker::before {
+    width: 24px;
+  }
+  .eceh {
+    margin-top: 10px;
+  }
+  .intro {
+    font-size: 17px;
+    margin-top: 28px;
+  }
+  .ctas {
+    gap: 24px;
+    margin-top: 26px;
+  }
+  .btn {
+    height: 50px;
+    padding: 0 20px 0 22px;
+  }
+  /* the top sheets rise above the stage box in 3D; scaling towards a lower
+     origin keeps them clear of the buttons above */
+  .scene {
+    height: 380px;
+    margin: 28px -18px 0;
+  }
+  .stage {
+    transform: scale(0.68);
+    transform-origin: 50% 78%;
+  }
+  .facts {
+    grid-template-columns: 1fr 1fr;
+    margin-top: 34px;
+  }
+  .facts > div {
+    padding: 18px 12px 16px 0;
+  }
+  .facts > div + div {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .facts > div:nth-child(even) {
+    padding-left: 16px;
+    border-left: 1px solid var(--line);
+  }
+  .facts > div:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+}

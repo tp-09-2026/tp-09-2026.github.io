@@ -1,0 +1,61 @@
+# Every push to main and every 3 hours: download sprints and tasks from Jira,
+# type-check, run the tests (they also validate the content files and PDF names),
+# build the site and publish it on GitHub Pages.
+# One-time setup in the repository:
+#   Settings → Pages → Source: "GitHub Actions"
+#   Settings → Secrets and variables → Actions: JIRA_EMAIL, JIRA_API_TOKEN
+name: Nasadenie na GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Download sprints from Jira
+        run: npm run jira
+        env:
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      - run: npm run typecheck
+      - run: npm test
+      - name: Build
+        # "<org>.github.io" is served from "/", any other repository from "/<repo>/"
+        run: |
+          REPO="${GITHUB_REPOSITORY#*/}"
+          if [[ "$REPO" == *.github.io ]]; then export BASE_PATH=/; else export BASE_PATH="/$REPO/"; fi
+          npm run build
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

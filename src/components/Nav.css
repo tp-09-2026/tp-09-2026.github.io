@@ -1,0 +1,104 @@
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  transition:
+    background-color 0.3s,
+    box-shadow 0.3s;
+}
+.nav.solid {
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+  box-shadow: 0 1px 0 var(--line);
+}
+.nav-in {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: 76px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+.brand-s {
+  color: var(--fg-3);
+  font-weight: 500;
+}
+.links {
+  display: flex;
+  gap: 34px;
+  margin-left: auto;
+}
+.links a {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--fg-2);
+  padding: 4px 0;
+  transition: color 0.2s;
+}
+.links a:hover,
+.links a[aria-current='true'] {
+  color: var(--fg);
+}
+.links a[aria-current='true']::after {
+  transform: scaleX(1);
+}
+.theme {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line-2);
+  border-radius: 50%;
+  transition: border-color 0.2s;
+}
+.theme:hover {
+  border-color: var(--fg);
+}
+.theme .sun,
+html.dark .theme .moon {
+  display: none;
+}
+html.dark .theme .sun {
+  display: block;
+}
+
+@media (max-width: 760px) {
+  .nav {
+    position: absolute;
+  }
+  .nav-in {
+    flex-wrap: wrap;
+    height: auto;
+    padding-top: 14px;
+    padding-bottom: 6px;
+    gap: 10px 16px;
+  }
+  .links {
+    order: 3;
+    width: 100%;
+    margin: 0;
+    gap: 22px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .links::-webkit-scrollbar {
+    display: none;
+  }
+  .links a {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  .theme {
+    margin-left: auto;
+    width: 36px;
+    height: 36px;
+  }
+}

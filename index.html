@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="sk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TP-09 · ECEH</title>
+    <meta
+      name="description"
+      content="Tím 09 z predmetu Tímový projekt na FIIT STU (2026/27) a náš progres na projekte ECEH: šprinty, zápisnice a dokumenty."
+    />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <meta name="theme-color" content="#0a0b0a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <script>
+      // Pick the theme before the first paint so the page never flashes the wrong
+      // colours: #dark/#light in the URL, then the visitor's saved choice, then the system setting.
+      (function () {
+        var dark;
+        try {
+          var hash = location.hash;
+          var saved = localStorage.getItem('theme');
+          dark =
+            hash === '#dark' ? true : hash === '#light' ? false : saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        } catch (e) {
+          dark = false;
+        }
+        document.documentElement.classList.toggle('dark', dark);
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>Táto stránka potrebuje zapnutý JavaScript.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

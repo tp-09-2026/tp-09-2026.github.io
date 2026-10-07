@@ -1,0 +1,264 @@
+.sub-note {
+  margin: -14px 0 34px;
+  max-width: 62ch;
+  font-size: 15px;
+  color: var(--fg-2);
+}
+
+/* lineage: every team adds one sheet to the stack */
+.lineage {
+  display: grid;
+  grid-template-columns: repeat(var(--before, 5), minmax(0, 1fr)) minmax(0, 1.75fr);
+}
+.lineage li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-right: 22px;
+}
+.iso {
+  display: block;
+  width: 76px;
+  height: 80px;
+  overflow: visible;
+}
+.iso use {
+  fill: var(--bg);
+  stroke: var(--line-3);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.iso .t {
+  stroke: url(#ecehG);
+  stroke-width: 1.6;
+}
+.iso .m {
+  fill: url(#gM);
+  stroke: url(#ecehG);
+  stroke-width: 1.6;
+}
+.us .iso {
+  filter: var(--lglow);
+}
+.tl {
+  position: relative;
+  align-self: stretch;
+  height: 1px;
+  margin: 16px -22px 28px 0;
+  background: var(--line-3);
+}
+.tl::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--fg);
+}
+.gap .tl {
+  background: repeating-linear-gradient(90deg, var(--line-3) 0 4px, transparent 4px 9px);
+}
+.us .tl {
+  margin-right: 0;
+  background: var(--grad);
+  box-shadow: var(--glow);
+}
+.us .tl::before {
+  left: -1px;
+  top: -5px;
+  width: 11px;
+  height: 11px;
+  border: 0;
+  background: var(--mchip);
+  box-shadow:
+    0 0 0 3px var(--bg),
+    var(--glow);
+}
+.yr {
+  display: block;
+  font-size: 34px;
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.lineage b {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.who {
+  display: block;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--fg-2);
+  margin-top: 3px;
+}
+.us-card {
+  --surf: var(--bg-2);
+  align-self: stretch;
+  margin: -6px 16px 0 0;
+  padding: 24px 26px 26px;
+}
+.us-card .yr {
+  width: max-content;
+  font-weight: 400;
+  background: var(--mx);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-right: 0.08em;
+}
+.us-card .who {
+  margin-top: 8px;
+  max-width: 34ch;
+}
+
+/* what we want to build this year */
+.aims {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 64px;
+  align-items: start;
+}
+.aims .sub-h {
+  flex-direction: column;
+  align-items: flex-start;
+}
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+}
+.tbl th {
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  padding: 0 16px 14px 0;
+  border-bottom: 1px solid var(--line-3);
+}
+.tbl td {
+  padding: 19px 16px 19px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 17px;
+  vertical-align: middle;
+}
+.tbl th:first-child,
+.tbl td:first-child {
+  width: 46%;
+}
+.ell {
+  color: var(--fg-3);
+  font-size: 22px;
+  letter-spacing: 0.08em;
+}
+.st {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg-2);
+}
+.st::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--fg-2);
+}
+.st.rozpracovane::before {
+  border: 0;
+  background: var(--mchip);
+}
+.st.hotove::before {
+  border: 0;
+  background: var(--fg);
+}
+
+@media (max-width: 1180px) {
+  .lineage {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 40px;
+  }
+  .lineage .us {
+    grid-column: span 3;
+  }
+  .lineage li:nth-child(3n) .tl {
+    margin-right: 0;
+  }
+}
+@media (max-width: 760px) {
+  .lineage {
+    grid-template-columns: 1fr;
+    row-gap: 0;
+    border-left: 1px solid var(--line-3);
+    margin-left: 4px;
+  }
+  .lineage li {
+    padding: 0 0 26px 26px;
+  }
+  .lineage .us {
+    grid-column: auto;
+    padding-bottom: 0;
+  }
+  .iso {
+    display: none;
+  }
+  .tl {
+    position: absolute;
+    left: -5px;
+    top: 4px;
+    width: 9px;
+    height: 9px;
+    margin: 0;
+    background: none !important;
+    box-shadow: none !important;
+  }
+  .tl::before {
+    left: 0;
+    top: 0;
+  }
+  .us .tl {
+    left: -6px;
+    top: 30px;
+  }
+  .us .tl::before {
+    left: 0;
+    top: 0;
+  }
+  .gap::after {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 40px;
+    bottom: 6px;
+    width: 1px;
+    background: repeating-linear-gradient(180deg, var(--bg) 0 4px, transparent 4px 9px);
+  }
+  .yr {
+    font-size: 26px;
+    margin-bottom: 6px;
+  }
+  .us-card {
+    margin: 0 14px 14px 0;
+    padding: 20px 20px 22px;
+  }
+  .aims {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .tbl th:first-child,
+  .tbl td:first-child {
+    width: auto;
+  }
+}

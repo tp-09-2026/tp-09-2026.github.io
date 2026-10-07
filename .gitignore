@@ -1,0 +1,14 @@
+node_modules/
+dist/
+
+# local secrets (Jira token) – never commit
+.env.local
+.env*.local
+
+# downloaded from Jira by `npm run jira` (in CI before every build)
+src/content/jira-data.json
+*.log
+.DS_Store
+
+# design mockups and brainstorming files (local only)
+.superpowers/

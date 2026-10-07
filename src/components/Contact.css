@@ -1,0 +1,91 @@
+.contact {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 72px;
+  align-items: start;
+}
+.mail .lbl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mail-a {
+  display: block;
+  margin: 20px 0 30px;
+  font-size: clamp(28px, 3.7vw, 52px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+.mail-part {
+  white-space: nowrap;
+}
+.mail-a.muted {
+  color: var(--fg-4);
+}
+.copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 22px 0 18px;
+  border: 1px solid var(--line-3);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+.copy:hover {
+  background: var(--inv);
+  border-color: var(--inv);
+  color: var(--on-inv);
+}
+.ext {
+  border-top: 1px solid var(--line-3);
+}
+.ext li > a,
+.ext li > div {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 28px 2px 28px 0;
+  border-bottom: 1px solid var(--line-2);
+}
+.ext-t {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-right: auto;
+}
+.ext b {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+.ext-t > span {
+  font-size: 15px;
+  color: var(--fg-2);
+}
+.ext a > .i {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s;
+}
+.ext a:hover > .i {
+  transform: translate(3px, -3px);
+}
+
+@media (max-width: 760px) {
+  .contact {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
+  .ext b {
+    font-size: 24px;
+  }
+}

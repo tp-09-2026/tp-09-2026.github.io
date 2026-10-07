@@ -1,0 +1,34 @@
+.foot {
+  margin-top: 150px;
+}
+.foot-line {
+  height: 2px;
+  background: var(--mline);
+  box-shadow: var(--glow);
+}
+.foot-in {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  padding-top: 30px;
+  padding-bottom: 42px;
+  font-size: 14px;
+  color: var(--fg-2);
+}
+.foot-in p {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.foot .mark {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 760px) {
+  .foot {
+    margin-top: 96px;
+  }
+}

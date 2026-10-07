@@ -1,0 +1,148 @@
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  justify-content: flex-end;
+  margin-right: -13px;
+}
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 13px;
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--fg-2);
+  transition:
+    color 0.2s,
+    background 0.2s;
+}
+.tab:hover {
+  color: var(--fg);
+}
+.tab .c {
+  font: 500 11.5px/1 var(--font-mono);
+  color: var(--fg-3);
+}
+.tab[aria-pressed='true'] {
+  background: var(--inv);
+  color: var(--on-inv);
+}
+.tab[aria-pressed='true'] .c {
+  color: var(--on-inv-2);
+}
+
+/* every document is a small stack of sheets that fans out on hover */
+.docs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 34px 44px;
+}
+.doc {
+  display: flex;
+  flex-direction: column;
+  min-height: 208px;
+  padding: 26px 30px 26px 32px;
+}
+.doc .sheet-svg path {
+  stroke: var(--line-2);
+  stroke-width: 1.2;
+  transition: stroke 0.3s;
+}
+.doc .sheet-svg .b {
+  opacity: 0;
+  transition:
+    transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 0.3s;
+}
+.doc:hover .sheet-svg {
+  filter: var(--lglow);
+}
+.doc:hover .sheet-svg path {
+  stroke: url(#ecehG);
+}
+.doc:hover .sheet-svg .b {
+  opacity: 1;
+  transform: translate(calc(var(--k) * 7px), calc(var(--k) * 7px));
+}
+.doc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.doc-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+.doc-type .i {
+  width: 17px;
+  height: 17px;
+  color: var(--fg);
+}
+.doc time {
+  font-size: 12.5px;
+  color: var(--fg-2);
+}
+.doc-title {
+  display: block;
+  margin: 28px 0 24px;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+.doc-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  font-size: 14px;
+  color: var(--fg-2);
+}
+.pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 12px/1 var(--font-mono);
+  color: var(--fg);
+}
+.pdf .i {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.3s;
+}
+.doc:hover .pdf .i {
+  transform: translate(2px, -2px);
+}
+
+@media (max-width: 1180px) {
+  .docs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .tabs {
+    justify-content: flex-start;
+    margin-right: 0;
+  }
+  .docs {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .doc {
+    min-height: 186px;
+  }
+  .doc-title {
+    font-size: 23px;
+    margin: 22px 0;
+  }
+}

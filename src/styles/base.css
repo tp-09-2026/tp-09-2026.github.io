@@ -1,0 +1,396 @@
+/* Reset, page-wide styles and small shared pieces used by several sections. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+  padding: 0;
+}
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 17px/1.6 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+  transition:
+    background-color 0.35s,
+    color 0.35s;
+}
+/* film grain over the whole page, so the gradients do not look plastic */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: var(--grain);
+  mix-blend-mode: overlay;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+ul,
+ol {
+  list-style: none;
+}
+[hidden] {
+  display: none !important;
+}
+::selection {
+  background: #43cfd8;
+  color: #0a0b0a;
+}
+:focus-visible {
+  outline: 2px solid #43cfd8;
+  outline-offset: 3px;
+}
+p {
+  text-wrap: pretty;
+}
+
+/* helpers */
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.i {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mark {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  fill: var(--bg);
+  overflow: visible;
+}
+.mono {
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+.up {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.wrap {
+  max-width: 1304px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+.lbl {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+.big {
+  font-size: clamp(19px, 1.7vw, 23px);
+  line-height: 1.52;
+  letter-spacing: -0.012em;
+  color: var(--fg);
+}
+.bal {
+  text-wrap: balance;
+}
+
+/* "doplníme" badge for missing information */
+.todo {
+  display: inline-flex;
+  align-items: center;
+  font: 500 11px/1 var(--font-sans);
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--todo-fg);
+  background: var(--todo-bg);
+  border: 1px dashed var(--todo-bd);
+  border-radius: 5px;
+  padding: 4px 7px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* gradient underline that slides in on hover */
+.u {
+  position: relative;
+}
+.u::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 2px;
+  background: var(--grad);
+  box-shadow: var(--glow);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.u:hover::after,
+.u:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* pulsing "prebieha" status */
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg);
+  white-space: nowrap;
+}
+.live::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mchip);
+  box-shadow:
+    0 0 0 3px rgba(67, 207, 216, 0.22),
+    var(--glow);
+  animation: pulse 2.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    box-shadow:
+      0 0 0 7px rgba(67, 207, 216, 0),
+      var(--glow);
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-2);
+  white-space: nowrap;
+}
+.chip .i {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+}
+.chip.ok {
+  background: var(--inv);
+  border-color: var(--inv);
+  color: var(--on-inv);
+}
+
+/* segmented day bar: --n days in the sprint, --k days elapsed */
+.ticks-w {
+  flex: 1;
+  filter: var(--lglow);
+}
+.ticks {
+  --seg: calc((100% - (var(--n) - 1) * 3px) / var(--n));
+  display: block;
+  height: 8px;
+  background:
+    var(--mline) 0 0 / max(0px, var(--seg) * var(--k) + (var(--k) - 1) * 3px + 1px) 100% no-repeat,
+    var(--line-2);
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 var(--seg), transparent 0 calc(var(--seg) + 3px));
+  mask: repeating-linear-gradient(90deg, #000 0 var(--seg), transparent 0 calc(var(--seg) + 3px));
+}
+
+/* outlined numerals: hairline type, the mesh rises inside (--nf = how full) */
+.num {
+  position: relative;
+  display: inline-block;
+  font-weight: 800;
+  line-height: 0.74;
+  letter-spacing: -0.03em;
+  padding-right: 0.05em;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(var(--ns, var(--line-3)), var(--ns, var(--line-3)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 2.5px transparent;
+  -webkit-text-fill-color: var(--nfill, var(--surf, var(--bg)));
+  cursor: default;
+}
+.num::after {
+  content: attr(data-n);
+  position: absolute;
+  inset: 0;
+  padding-right: inherit;
+  -webkit-text-stroke: 0;
+  -webkit-text-fill-color: transparent;
+  background-image: var(--mx);
+  background-position: 0 100%;
+  background-size: 100% var(--nf, 0%);
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  transition: background-size 1.1s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.num:hover::after {
+  background-size: 100% 100%;
+}
+.num.full {
+  --nfill: var(--fg-4);
+}
+.num.dim {
+  --ns: var(--line-2);
+}
+.num.cur {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke-width: 2.6px;
+  filter: var(--tglow);
+}
+
+/* outlines in the ECEH logo geometry, drawn by <Sheet> */
+.sheet {
+  position: relative;
+  isolation: isolate;
+}
+.sheet-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  overflow: visible;
+  pointer-events: none;
+}
+.sheet-svg path {
+  fill: var(--surf, var(--bg));
+  stroke: url(#ecehG);
+  stroke-width: 1.4;
+}
+.sheet-svg .b1 {
+  stroke-opacity: 0.55;
+  stroke-width: 1.2;
+}
+.sheet-svg .b2 {
+  stroke-opacity: 0.3;
+  stroke-width: 1.2;
+}
+
+/* sections */
+.sec {
+  padding-top: 140px;
+  scroll-margin-top: 60px;
+}
+.sec-head {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 36px 64px;
+  align-items: end;
+  padding-bottom: 44px;
+  margin-bottom: 72px;
+  border-bottom: 1px solid var(--line-2);
+}
+h2 {
+  font-size: clamp(50px, 6.5vw, 92px);
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.055em;
+}
+h2 sup {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0.06em 0 0 0.3em;
+  font: 500 13px/1 var(--font-mono);
+  letter-spacing: 0.02em;
+  color: var(--fg-2);
+}
+h3 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+.sec-lead p + p {
+  margin-top: 18px;
+  color: var(--fg-2);
+}
+.sub {
+  margin-bottom: 104px;
+}
+.sub-h {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-bottom: 30px;
+}
+.empty {
+  font-size: 17px;
+  color: var(--fg-2);
+}
+
+@media (max-width: 760px) {
+  body {
+    font-size: 16px;
+  }
+  .wrap {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .sec {
+    padding-top: 96px;
+  }
+  .sec-head {
+    grid-template-columns: 1fr;
+    margin-bottom: 44px;
+    padding-bottom: 30px;
+  }
+  .sub {
+    margin-bottom: 72px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

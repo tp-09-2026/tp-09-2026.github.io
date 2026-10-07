@@ -1,0 +1,131 @@
+/*
+ * Design tokens: every colour, gradient and font of the site lives here.
+ * Light theme on :root, dark theme on html.dark (set before first paint by the
+ * script in index.html, toggled by the moon/sun button).
+ */
+@property --gap {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 26px;
+}
+
+:root {
+  --font-sans: 'Inter Tight Variable', 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --bg: #ffffff;
+  --bg-2: #f5f6f3;
+  --bg-3: #ebede8;
+  --fg: #0b0c0b;
+  --fg-2: #4f524d;
+  --fg-3: #7c7f79;
+  --fg-4: #d9dbd6;
+  --line: rgba(11, 12, 11, 0.1);
+  --line-2: rgba(11, 12, 11, 0.19);
+  --line-3: rgba(11, 12, 11, 0.55);
+  --inv: #0b0c0b;
+  --on-inv: #ffffff;
+  --on-inv-2: rgba(255, 255, 255, 0.66);
+
+  /* ECEH logo colours */
+  --grad: linear-gradient(100deg, #43cfd8, #7cd359);
+  /* mesh colours: ocean blue → teal → green → lime */
+  --mline: linear-gradient(90deg, #0b3b5c, #1a87a1 24%, #43cfd8 48%, #7cd359 76%, #c6e85c);
+  --mx: radial-gradient(55% 65% at 96% 6%, #7cd359, transparent 72%),
+    radial-gradient(45% 55% at 100% 100%, #bfe35e, transparent 72%),
+    radial-gradient(70% 80% at 14% 0, #43cfd8, transparent 78%), linear-gradient(170deg, #1d93a8, #0b3b5c 88%);
+  --mchip: radial-gradient(90% 90% at 100% 0, rgba(124, 211, 89, 0.95), transparent 62%),
+    radial-gradient(70% 70% at 100% 100%, rgba(212, 240, 107, 0.9), transparent 60%),
+    radial-gradient(80% 80% at 0 0, rgba(67, 207, 216, 0.95), transparent 70%), linear-gradient(150deg, #157f99, #0b3b5c);
+
+  --glow: 0 0 0 transparent;
+  --tglow: none;
+  --lglow: none;
+  --eglow: none;
+  --grain: 0.3;
+  --ph-hi: rgba(255, 255, 255, 0.95);
+
+  --todo-fg: #b45309;
+  --todo-bg: #fef3c7;
+  --todo-bd: #f59e0b;
+
+  /* hero mesh: luminous field with ink on top */
+  --hx: #e3f3ee;
+  --ca: 67, 207, 216;
+  --aa: 0.8;
+  --cb: 124, 211, 89;
+  --ab: 0.72;
+  --cc: 212, 240, 107;
+  --ac: 0.9;
+  --cd: 255, 255, 255;
+  --ad: 0.94;
+  --ce: 26, 135, 161;
+  --ae: 0.36;
+  --veil: rgba(255, 255, 255, 0.3);
+
+  /* line-art sheets */
+  --sh-fill: rgba(255, 255, 255, 0.36);
+  --sh-top: rgba(255, 255, 255, 0.84);
+  --sh-line: #0b0c0b;
+  --sh-glow: none;
+  --fl: rgba(11, 59, 92, 0.2);
+  --e-line: #0b0c0b;
+  --eb1: #1d93a8;
+  --eb2: #0b3b5c;
+  --el: #bfe35e;
+
+  color-scheme: light;
+}
+
+html.dark {
+  --bg: #0a0b0a;
+  --bg-2: #111311;
+  --bg-3: #1a1c1a;
+  --fg: #eeefea;
+  --fg-2: #a3a69f;
+  --fg-3: #72756f;
+  --fg-4: #272a26;
+  --line: rgba(238, 239, 234, 0.09);
+  --line-2: rgba(238, 239, 234, 0.18);
+  --line-3: rgba(238, 239, 234, 0.5);
+  --inv: #eeefea;
+  --on-inv: #0a0b0a;
+  --on-inv-2: rgba(10, 11, 10, 0.62);
+
+  --mline: linear-gradient(90deg, #1a87a1, #43cfd8 30%, #7cd359 72%, #d4f06b);
+  --mx: radial-gradient(55% 65% at 96% 6%, #7cd359, transparent 72%),
+    radial-gradient(45% 55% at 100% 100%, #d4f06b, transparent 72%),
+    radial-gradient(70% 80% at 14% 0, #43cfd8, transparent 78%), linear-gradient(170deg, #2ab4c6, #17648a 88%);
+
+  --glow: 0 0 10px rgba(67, 207, 216, 0.55), 0 0 28px rgba(124, 211, 89, 0.25);
+  --tglow: drop-shadow(0 0 22px rgba(67, 207, 216, 0.3)) drop-shadow(0 0 64px rgba(124, 211, 89, 0.14));
+  --lglow: drop-shadow(0 0 5px rgba(67, 207, 216, 0.45));
+  --eglow: drop-shadow(0 0 3px rgba(67, 207, 216, 0.55)) drop-shadow(0 0 9px rgba(67, 207, 216, 0.18));
+  --grain: 0.55;
+  --ph-hi: rgba(238, 239, 234, 0.07);
+
+  --todo-fg: #fbbf24;
+  --todo-bg: rgba(245, 158, 11, 0.12);
+  --todo-bd: #f59e0b;
+
+  --hx: #050807;
+  --aa: 0.5;
+  --ab: 0.44;
+  --ac: 0.22;
+  --cd: 3, 6, 5;
+  --ad: 0.94;
+  --ae: 0.34;
+  --veil: rgba(5, 8, 7, 0.55);
+
+  --sh-fill: rgba(6, 9, 8, 0.5);
+  --sh-top: rgba(6, 9, 8, 0.84);
+  --sh-line: url(#ecehG);
+  --sh-glow: drop-shadow(0 0 5px rgba(67, 207, 216, 0.55));
+  --fl: rgba(67, 207, 216, 0.22);
+  --e-line: url(#ecehG);
+  --eb1: #2ab4c6;
+  --eb2: #17648a;
+  --el: #d4f06b;
+
+  color-scheme: dark;
+}
