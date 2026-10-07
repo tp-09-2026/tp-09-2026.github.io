@@ -2,7 +2,7 @@ import { useState, type CSSProperties } from 'react';
 import { dokumenty } from '../content/dokumenty';
 import { jiraData } from '../content/jiraData';
 import { milniky, semestre, sprinty } from '../content/sprinty';
-import { isTodo, type Sprint } from '../content/types';
+import { isTodo, type Poduloha, type Sprint, type StavUlohy, type Uloha } from '../content/types';
 import { formatDay, formatRange, type ISODate } from '../lib/dates';
 import { kategoria, meetingDays, type Dokument, type KategoriaId } from '../lib/documents';
 import { updatedLabel } from '../lib/jira';
@@ -219,31 +219,26 @@ function CurrentSprint({
             </p>
             {sprint.ulohy && sprint.ulohy.length > 0 ? (
               <ul className="tasks">
-                {sprint.ulohy.map((u) => (
-                  <li key={u.text} className={cx(u.stav === 'hotova' && 't-done', u.stav === 'rozpracovana' && 't-wip')}>
-                    <span className="ck">{u.stav === 'hotova' && <Icon name="check" />}</span>
-                    <span className="tx">{typo(u.text)}</span>
-                    <span className="sr">{u.stav === 'hotova' ? 'hotová' : u.stav === 'rozpracovana' ? 'rozpracovaná' : 'čaká'}</span>
-                    {u.stav === 'rozpracovana' && <span className="live" aria-hidden="true">prebieha</span>}
-                  </li>
+                {sprint.ulohy.map((u, i) => (
+                  <TaskRow key={`${i}-${u.text}`} uloha={u} />
                 ))}
               </ul>
             ) : (
               <p className="empty">Úlohy doplníme na plánovaní šprintu.</p>
             )}
             {view.kind === 'po' && sprint.vysledky && sprint.vysledky.length > 0 && (
-            <>
-              <span className="lbl res-h">Výsledky</span>
-              <ul className="res">
-                {sprint.vysledky.map((v) => (
-                  <li key={v}>
-                    <Icon name="check" />
-                    {typo(v)}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
+              <>
+                <span className="lbl res-h">Výsledky</span>
+                <ul className="res">
+                  {sprint.vysledky.map((v) => (
+                    <li key={v}>
+                      <Icon name="check" />
+                      {typo(v)}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           {sprint.ulohyPoznamka && (
               <p className="tasks-note">
                 <TodoBadge text={sprint.ulohyPoznamka.todo} />
@@ -318,6 +313,72 @@ function CurrentSprint({
         </div>
       </div>
     </Sheet>
+  );
+}
+
+const STAV_TEXT: Record<StavUlohy, string> = { hotova: 'hotová', rozpracovana: 'rozpracovaná', caka: 'čaká' };
+
+function stateClass(stav: StavUlohy): string | false {
+  return (stav === 'hotova' && 't-done') || (stav === 'rozpracovana' && 't-wip');
+}
+
+/** Checkbox, text and state of one task or subtask. */
+function TaskState({ uloha }: { uloha: Poduloha }) {
+  return (
+    <>
+      <span className="ck">{uloha.stav === 'hotova' && <Icon name="check" />}</span>
+      <span className="tx">{typo(uloha.text)}</span>
+      <span className="sr">{STAV_TEXT[uloha.stav]}</span>
+      {uloha.stav === 'rozpracovana' && (
+        <span className="live" aria-hidden="true">
+          prebieha
+        </span>
+      )}
+    </>
+  );
+}
+
+/**
+ * One task. A task with subtasks from Jira is a button: clicking it opens the
+ * list of its subtasks with their states.
+ */
+function TaskRow({ uloha }: { uloha: Uloha }) {
+  const [open, setOpen] = useState(false);
+  const subtasks = uloha.podulohy ?? [];
+  if (subtasks.length === 0) {
+    return (
+      <li>
+        <div className={cx('task-row', stateClass(uloha.stav))}>
+          <TaskState uloha={uloha} />
+        </div>
+      </li>
+    );
+  }
+  const done = subtasks.filter((p) => p.stav === 'hotova').length;
+  return (
+    <li>
+      <button
+        type="button"
+        className={cx('task-row', 'has-sub', stateClass(uloha.stav))}
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+      >
+        <TaskState uloha={uloha} />
+        <span className="sub-count mono" title="hotové podúlohy">
+          {done}/{subtasks.length}
+        </span>
+        <Icon name="right" className="chev" />
+      </button>
+      {open && (
+        <ul className="subtasks">
+          {subtasks.map((p, i) => (
+            <li key={`${i}-${p.text}`} className={cx('task-row', 'subtask', stateClass(p.stav))}>
+              <TaskState uloha={p} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
   );
 }
 

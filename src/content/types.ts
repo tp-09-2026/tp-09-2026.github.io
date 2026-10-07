@@ -39,9 +39,16 @@ export interface Milnik {
 
 export type StavUlohy = 'hotova' | 'rozpracovana' | 'caka';
 
+export interface Poduloha {
+  text: string;
+  stav: StavUlohy;
+}
+
 export interface Uloha {
   text: string;
   stav: StavUlohy;
+  /** subtasks from Jira, shown when the task is opened on the page */
+  podulohy?: Poduloha[];
 }
 
 export interface Sprint {

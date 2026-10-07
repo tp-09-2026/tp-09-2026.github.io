@@ -22,6 +22,7 @@ try {
 }
 
 const PAGE = 50;
+const FIELDS = 'summary,status,issuetype,labels,parent';
 
 const email = process.env.JIRA_EMAIL?.trim();
 const token = process.env.JIRA_API_TOKEN?.trim();
@@ -59,16 +60,40 @@ async function issues(sprintId: number): Promise<RawIssue[]> {
   const all: RawIssue[] = [];
   for (let startAt = 0; ; startAt += PAGE) {
     const page = await get<{ issues: RawIssue[]; total: number }>(
-      `/rest/agile/1.0/sprint/${sprintId}/issue?startAt=${startAt}&maxResults=${PAGE}&fields=summary,status,issuetype,labels`,
+      `/rest/agile/1.0/sprint/${sprintId}/issue?startAt=${startAt}&maxResults=${PAGE}&fields=${FIELDS}`,
     );
     all.push(...page.issues);
     if (all.length >= page.total || page.issues.length === 0) return all;
   }
 }
 
+// Neither the sprint endpoint nor `sprint = N` in JQL returns subtasks (they only
+// inherit the sprint of their parent), so they are looked up by their parents.
+async function subtasks(parentKeys: readonly string[]): Promise<RawIssue[]> {
+  const all: RawIssue[] = [];
+  for (let i = 0; i < parentKeys.length; i += 50) {
+    const jql = encodeURIComponent(`parent in (${parentKeys.slice(i, i + 50).join(',')}) ORDER BY rank`);
+    let next = '';
+    for (;;) {
+      const page = await get<{ issues: RawIssue[]; nextPageToken?: string }>(
+        `/rest/api/3/search/jql?jql=${jql}&fields=${FIELDS}&maxResults=100${next ? `&nextPageToken=${encodeURIComponent(next)}` : ''}`,
+      );
+      all.push(...page.issues);
+      if (!page.nextPageToken || page.issues.length === 0) break;
+      next = page.nextPageToken;
+    }
+  }
+  return all;
+}
+
 const rawSprints = await sprints();
 const issuesBySprint: Record<number, RawIssue[]> = {};
-for (const sprint of rawSprints) issuesBySprint[sprint.id] = await issues(sprint.id);
+for (const sprint of rawSprints) {
+  const tasks = await issues(sprint.id);
+  const known = new Set(tasks.map((t) => t.key));
+  const subs = jiraNastavenie.zobrazitPodulohy && tasks.length > 0 ? await subtasks([...known]) : [];
+  issuesBySprint[sprint.id] = [...tasks, ...subs.filter((s) => !known.has(s.key))];
+}
 
 const data = normalizeJira(rawSprints, issuesBySprint, {
   podulohy: jiraNastavenie.zobrazitPodulohy,
@@ -76,5 +101,8 @@ const data = normalizeJira(rawSprints, issuesBySprint, {
 });
 await writeFile(OUTPUT, `${JSON.stringify(data, null, 2)}\n`);
 
-const taskCount = data.sprinty.reduce((sum, s) => sum + s.ulohy.length, 0);
-console.log(`Jira: ${data.sprinty.length} šprintov a ${taskCount} úloh uložených do src/content/jira-data.json.`);
+const tasks = data.sprinty.flatMap((s) => s.ulohy);
+const subtaskCount = tasks.reduce((sum, u) => sum + (u.podulohy?.length ?? 0), 0);
+console.log(
+  `Jira: ${data.sprinty.length} šprintov, ${tasks.length} úloh a ${subtaskCount} podúloh uložených do src/content/jira-data.json.`,
+);

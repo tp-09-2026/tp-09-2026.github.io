@@ -1,6 +1,6 @@
-import type { Sprint } from '../content/types';
+import type { Sprint, Uloha } from '../content/types';
 import { addDays } from './dates';
-import type { JiraData, JiraSprint } from './jira';
+import type { JiraData, JiraSprint, JiraUloha } from './jira';
 
 /** "SCRUM Sprint 3" → 3 */
 export function sprintNumberFromName(name: string): number | undefined {
@@ -58,6 +58,13 @@ export function mergeSprints(manual: readonly Sprint[], data: JiraData | null): 
   });
 }
 
+/** Jira keys stay out of the page; only the text and state are published. */
+function toUloha(u: JiraUloha): Uloha {
+  const uloha: Uloha = { text: u.text, stav: u.stav };
+  if (u.podulohy) uloha.podulohy = u.podulohy.map((p) => ({ text: p.text, stav: p.stav }));
+  return uloha;
+}
+
 function fromJiraSprint(j: JiraSprint, cislo: number, manual: Sprint | undefined): Sprint | undefined {
   const od = j.od ?? manual?.od;
   const end = j.do ?? manual?.do;
@@ -68,7 +75,7 @@ function fromJiraSprint(j: JiraSprint, cislo: number, manual: Sprint | undefined
     cislo,
     od,
     do: end,
-    ulohy: hasTasks ? j.ulohy.map((u) => ({ text: u.text, stav: u.stav })) : manual?.ulohy,
+    ulohy: hasTasks ? j.ulohy.map(toUloha) : manual?.ulohy,
     ulohyPoznamka: hasTasks ? undefined : manual?.ulohyPoznamka,
     ulohyZJiry: hasTasks,
   };

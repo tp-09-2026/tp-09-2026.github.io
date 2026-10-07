@@ -98,7 +98,7 @@
     justify-content: flex-start;
     margin: -16px 0 18px;
   }
-    .team {
+  .team {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 22px 14px;
   }

@@ -26,13 +26,18 @@ export interface RawIssue {
     status?: { statusCategory?: { key?: string } };
     issuetype?: { subtask?: boolean };
     labels?: string[];
+    parent?: { key?: string };
   };
 }
 
-export interface JiraUloha {
+export interface JiraPoduloha {
   kluc: string;
   text: string;
   stav: StavUlohy;
+}
+
+export interface JiraUloha extends JiraPoduloha {
+  podulohy?: JiraPoduloha[];
 }
 
 export interface JiraSprint {
@@ -97,6 +102,14 @@ export function lastSprintDay(startDate: string, endDate: string): ISODate {
   return sameTimeOfDay && lastDay > localDay(startDate) ? shiftDay(lastDay, -1) : lastDay;
 }
 
+function toTask(issue: RawIssue): JiraPoduloha {
+  return {
+    kluc: issue.key,
+    text: (issue.fields.summary ?? issue.key).trim(),
+    stav: taskState(issue.fields.status?.statusCategory?.key),
+  };
+}
+
 export function normalizeJira(
   sprints: readonly RawSprint[],
   issuesBySprint: Readonly<Record<number, readonly RawIssue[]>>,
@@ -107,14 +120,24 @@ export function normalizeJira(
     aktualizovane: now.toISOString(),
     sprinty: sprints.map((s) => {
       const stav = s.state === 'active' || s.state === 'closed' ? s.state : 'future';
-      const ulohy = (issuesBySprint[s.id] ?? [])
-        .filter((issue) => options.podulohy || !issue.fields.issuetype?.subtask)
+      const all = issuesBySprint[s.id] ?? [];
+      // subtasks are grouped under their parent; they follow the parent's visibility,
+      // so a subtask of a task that is not public is never published either
+      const subtasksByParent = new Map<string, JiraPoduloha[]>();
+      for (const issue of all) {
+        const parent = issue.fields.parent?.key;
+        if (!issue.fields.issuetype?.subtask || !parent) continue;
+        subtasksByParent.set(parent, [...(subtasksByParent.get(parent) ?? []), toTask(issue)]);
+      }
+      const ulohy = all
+        .filter((issue) => !issue.fields.issuetype?.subtask)
         .filter((issue) => !options.stitok || (issue.fields.labels ?? []).includes(options.stitok))
-        .map((issue) => ({
-          kluc: issue.key,
-          text: (issue.fields.summary ?? issue.key).trim(),
-          stav: taskState(issue.fields.status?.statusCategory?.key),
-        }));
+        .map((issue) => {
+          const uloha: JiraUloha = toTask(issue);
+          const podulohy = options.podulohy ? subtasksByParent.get(issue.key) : undefined;
+          if (podulohy?.length) uloha.podulohy = podulohy;
+          return uloha;
+        });
       const sprint: JiraSprint = { id: s.id, nazov: s.name.trim(), stav, ulohy };
       if (s.startDate) sprint.od = localDay(s.startDate);
       if (s.startDate && s.endDate) sprint.do = lastSprintDay(s.startDate, s.endDate);

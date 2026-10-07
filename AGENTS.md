@@ -60,7 +60,10 @@ Zlý názov alebo neznámy priečinok zhodí `npm test`, takže sa nenasadí roz
   - Šprint z Jiry sa spáruje s ručným podľa čísla na konci názvu („SCRUM Sprint 0“ = šprint 0).
   - Na stránku idú **len úlohy so štítkom (label) `TP-09`**. Úloha bez štítku ostane len v Jire
     (napr. interné veci). Nastavuje sa v `src/content/jira.ts` (`stitok`).
-  - Stav úlohy podľa kategórie stavu v Jire: To Do → čaká, In Progress → rozpracovaná, Done → hotová. Podúlohy sa nezobrazujú.
+  - Stav úlohy podľa kategórie stavu v Jire: To Do → čaká, In Progress → rozpracovaná, Done → hotová.
+  - Podúlohy (subtasky) sa ukážu pod svojou úlohou: riadok úlohy sa dá rozkliknúť a vidno v ňom „hotové/všetky“.
+    Štítok potrebuje len nadradená úloha; podúlohy úlohy bez štítku sa nezverejnia.
+    Vypína sa v `src/content/jira.ts` (`zobrazitPodulohy: false`).
   - Na stránku ide len názov úlohy a jej stav. Mená ľudí ani popisy nie, ale názvy úloh sú verejné, tak ich tak aj píšte.
 - **V `src/content/sprinty.ts` (`sprintyRucne`) píš len to, čo Jira nemá:**
   - `nazov` (čitateľný názov, napr. „Rozbeh tímu a projektu“),

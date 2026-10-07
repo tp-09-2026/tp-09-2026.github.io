@@ -56,9 +56,34 @@ describe('normalizeJira', () => {
     expect(data.sprinty[0]?.ulohy.map((u) => u.kluc)).toEqual(['SCRUM-8']);
   });
 
-  it('can include subtasks', () => {
-    const data = normalizeJira(sprints, issues, { podulohy: true });
-    expect(data.sprinty[0]?.ulohy).toHaveLength(3);
+  it('nests subtasks under their parent task', () => {
+    const nested: Record<number, RawIssue[]> = {
+      7: [
+        { key: 'SCRUM-15', fields: { summary: 'Stránka', labels: ['TP-09'], status: { statusCategory: { key: 'indeterminate' } } } },
+        { key: 'SCRUM-18', fields: { summary: 'Prieskum', issuetype: { subtask: true }, parent: { key: 'SCRUM-15' }, status: { statusCategory: { key: 'done' } } } },
+        { key: 'SCRUM-20', fields: { summary: 'Implementácia', issuetype: { subtask: true }, parent: { key: 'SCRUM-15' } } },
+        // the parent is not public (no label), so its subtask must not leak either
+        { key: 'SCRUM-7', fields: { summary: 'Interná vec' } },
+        { key: 'SCRUM-30', fields: { summary: 'Detail internej veci', issuetype: { subtask: true }, parent: { key: 'SCRUM-7' } } },
+      ],
+    };
+    const [sprint] = normalizeJira(sprints, nested, { podulohy: true, stitok: 'TP-09' }).sprinty;
+    expect(sprint?.ulohy).toEqual([
+      {
+        kluc: 'SCRUM-15',
+        text: 'Stránka',
+        stav: 'rozpracovana',
+        podulohy: [
+          { kluc: 'SCRUM-18', text: 'Prieskum', stav: 'hotova' },
+          { kluc: 'SCRUM-20', text: 'Implementácia', stav: 'caka' },
+        ],
+      },
+    ]);
+  });
+
+  it('leaves subtasks out when they are switched off', () => {
+    const [sprint] = normalizeJira(sprints, issues, { podulohy: false }).sprinty;
+    expect(sprint?.ulohy.every((u) => u.podulohy === undefined)).toBe(true);
   });
 });
 
@@ -118,6 +143,23 @@ describe('mergeSprints', () => {
       ulohy: [{ text: 'Úloha', stav: 'hotova' }],
       ulohyZJiry: true,
     });
+  });
+
+  it('keeps subtasks but drops the Jira keys', () => {
+    const [s1] = mergeSprints(
+      manual,
+      data([
+        {
+          id: 7,
+          nazov: 'SCRUM Sprint 1',
+          stav: 'active',
+          od: '2026-09-28',
+          do: '2026-10-11',
+          ulohy: [{ kluc: 'SCRUM-1', text: 'Úloha', stav: 'rozpracovana', podulohy: [{ kluc: 'SCRUM-2', text: 'Časť', stav: 'hotova' }] }],
+        },
+      ]),
+    );
+    expect(s1?.ulohy).toEqual([{ text: 'Úloha', stav: 'rozpracovana', podulohy: [{ text: 'Časť', stav: 'hotova' }] }]);
   });
 
   it('moves hand-planned sprints out of the way of real ones', () => {
