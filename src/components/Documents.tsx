@@ -16,9 +16,7 @@ export function Documents({ filter, onFilter }: { filter: DocFilter; onFilter: (
     <section className="sec" id="dokumenty">
       <div className="wrap">
         <header className="sec-head">
-          <h2>
-            Dokumenty<sup>03</sup>
-          </h2>
+          <h2>Dokumenty</h2>
           {dokumenty.length > 0 ? (
             <div className="tabs" role="group" aria-label="Typ dokumentu">
               <FilterButton active={filter === 'all'} onClick={() => onFilter('all')} label="Všetko" count={dokumenty.length} />

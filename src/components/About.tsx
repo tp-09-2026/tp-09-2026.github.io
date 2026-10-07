@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
-import { ciele, historia, historiaOverit, historiaPoznamka, oProjekte } from '../content/projekt';
-import type { KapitolaHistorie } from '../content/types';
+import { ciele, historia, historiaOverit, oProjekte } from '../content/projekt';
+import { isTodo, type KapitolaHistorie } from '../content/types';
 import { typo } from '../lib/typography';
 import { Sheet, TodoBadge, cx } from './ui';
 import './About.css';
@@ -12,15 +12,19 @@ export function About() {
     <section className="sec" id="projekt">
       <div className="wrap">
         <header className="sec-head">
-          <h2>
-            O&nbsp;projekte<sup>01</sup>
-          </h2>
+          <h2>O&nbsp;projekte</h2>
           <div className="sec-lead">
-            {oProjekte.map((text, i) => (
-              <p key={i} className={i === 0 ? 'big' : undefined}>
-                {typo(text)}
+            {isTodo(oProjekte) ? (
+              <p>
+                <TodoBadge text={oProjekte.todo} />
               </p>
-            ))}
+            ) : (
+              oProjekte.map((text, i) => (
+                <p key={i} className={i === 0 ? 'big' : undefined}>
+                  {typo(text)}
+                </p>
+              ))
+            )}
           </div>
         </header>
 
@@ -29,7 +33,6 @@ export function About() {
             <h3>Kto na ECEH robil pred nami</h3>
             {historiaOverit && <TodoBadge text="overiť" />}
           </div>
-          <p className="sub-note">{typo(historiaPoznamka)}</p>
           <ol className="lineage" style={{ '--before': historia.length - 1 } as CSSProperties}>
             {historia.map((kapitola, i) => (
               <Kapitola key={kapitola.rok} kapitola={kapitola} vrstvy={i + 1} medzera={hasGapAfter(i)} />

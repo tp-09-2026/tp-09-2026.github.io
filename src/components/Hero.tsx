@@ -1,12 +1,11 @@
 import { useEffect, useRef, type CSSProperties } from 'react';
 import { tim, uvod } from '../content/projekt';
 import { sprinty } from '../content/sprinty';
-import { clenovia, vedenie } from '../content/tim';
 import { isTodo, type Sprint } from '../content/types';
 import { formatDay, formatRange, type ISODate } from '../lib/dates';
 import { focusSprint, sprintDay, sprintLength, sprintNumber, type Focus } from '../lib/sprints';
 import { typo } from '../lib/typography';
-import { Icon, Value, studentov } from './ui';
+import { Icon } from './ui';
 import './Hero.css';
 
 export function Hero({ dnes }: { dnes: ISODate }) {
@@ -23,9 +22,6 @@ export function Hero({ dnes }: { dnes: ISODate }) {
       </div>
       <div className="wrap hero-in">
         <div>
-          <p className="kicker">
-            {tim.predmet} · {tim.fakulta} · {tim.rok}
-          </p>
           <h1>
             <span className="h1a">
               Tím <b>{tim.cislo}</b> na projekte
@@ -45,30 +41,6 @@ export function Hero({ dnes }: { dnes: ISODate }) {
           </div>
         </div>
         {focus.kind !== 'ziadny' && <SprintStack focus={focus} dnes={dnes} />}
-      </div>
-      <div className="wrap">
-        <dl className="facts">
-          <div>
-            <dt>Predmet</dt>
-            <dd>
-              {tim.predmet}, {tim.fakulta}
-            </dd>
-          </div>
-          <div>
-            <dt>Projekt</dt>
-            <dd>{tim.projekt}</dd>
-          </div>
-          <div>
-            <dt>{vedenie.veduci.funkcia}</dt>
-            <dd>
-              <Value value={vedenie.veduci.meno} />
-            </dd>
-          </div>
-          <div>
-            <dt>Členovia</dt>
-            <dd>{studentov(clenovia.length)}</dd>
-          </div>
-        </dl>
       </div>
     </section>
   );

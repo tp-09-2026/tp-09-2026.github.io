@@ -79,7 +79,7 @@ export interface Clen {
 }
 
 export interface Osoba {
-  /** how the role is labelled on the page, e.g. "Vedúca tímu" */
+  /** how the role is labelled on the page, e.g. "Vedúci tímu" */
   funkcia: string;
   meno: Maybe<string>;
   overit?: boolean;

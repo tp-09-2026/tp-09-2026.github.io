@@ -10,10 +10,7 @@ export function Contact() {
     <section className="sec" id="kontakt">
       <div className="wrap">
         <header className="sec-head">
-          <h2>
-            Kontakt<sup>05</sup>
-          </h2>
-          <p className="big bal">Ak máte otázku k&nbsp;projektu alebo k&nbsp;niečomu na tejto stránke, napíšte nám.</p>
+          <h2>Kontakt</h2>
         </header>
         <div className="contact">
           <div className="mail">

@@ -34,12 +34,7 @@ export function Progress({ dnes, onShowDocs }: { dnes: ISODate; onShowDocs: (fil
     <section className="sec" id="progres">
       <div className="wrap">
         <header className="sec-head">
-          <h2>
-            Progres<sup>02</sup>
-          </h2>
-          <div className="sec-lead">
-            <p className="big bal">Po každom šprinte sem dopíšeme, čo sme stihli.</p>
-          </div>
+          <h2>Progres</h2>
         </header>
         <SemesterRuler dnes={dnes} />
         {focus.kind !== 'ziadny' && <CurrentSprint focus={focus} dnes={dnes} onShowDocs={onShowDocs} />}
@@ -407,7 +402,7 @@ function SprintLog({ dnes }: { dnes: ISODate }) {
             // the running sprint glows, the next one is outlined, later ones fade out
             const variant = status === 'prebieha' ? 'cur' : index <= 1 ? undefined : 'dim';
             return (
-              <article key={s.cislo} className="lg-c">
+              <article key={s.cislo} className={cx('lg-c', status === 'planovany' && 'plan')}>
                 <Num n={sprintNumber(s.cislo)} variant={variant} fill={fill} />
                 <p className="lg-meta">
                   <span className="mono up">

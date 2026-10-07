@@ -709,6 +709,10 @@ button.task-row[aria-expanded='true'] .chev {
   font-size: 150px;
   margin-bottom: 40px;
 }
+/* a sprint that has not started has nothing to show yet, so its numeral does not fill on hover */
+.lg-c.plan .num::after {
+  content: none;
+}
 .lg-c h4 {
   margin-top: 20px;
   font-size: 28px;

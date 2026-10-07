@@ -1,8 +1,12 @@
 .contact {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   gap: 72px;
   align-items: start;
+}
+/* the e-mail is sized from the width of its column, so it always fits on one line */
+.mail {
+  container-type: inline-size;
 }
 .mail .lbl {
   display: flex;
@@ -12,7 +16,7 @@
 .mail-a {
   display: block;
   margin: 20px 0 30px;
-  font-size: clamp(28px, 3.7vw, 52px);
+  font-size: min(44px, 5.6cqi);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.04em;

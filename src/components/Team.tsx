@@ -9,9 +9,7 @@ export function Team() {
     <section className="sec" id="tim">
       <div className="wrap">
         <header className="sec-head">
-          <h2>
-            Tím<sup>04</sup>
-          </h2>
+          <h2>Tím</h2>
           <dl className="lead-dl">
             <Lead osoba={vedenie.veduci} />
             <Lead osoba={vedenie.productOwner} />

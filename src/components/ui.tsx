@@ -131,10 +131,3 @@ export function Sheet({
 
   return createElement(as, { ref, className: cx('sheet', className), ...rest }, outline, children);
 }
-
-/** "7 študentov", "3 študenti", "1 študent" */
-export function studentov(count: number): string {
-  if (count === 1) return '1 študent';
-  if (count >= 2 && count <= 4) return `${count} študenti`;
-  return `${count} študentov`;
-}

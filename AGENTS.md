@@ -80,7 +80,8 @@ Zlý názov alebo neznámy priečinok zhodí `npm test`, takže sa nenasadí roz
 ### Členovia tímu
 
 - Poradie je abecedne podľa priezviska.
-- Roly sa doplnia naraz pre všetkých, keď budú rozdelené: `rola: 'Scrum master'` namiesto `todo('rola')`.
+- Rola sa dopíše, keď je naisto dohodnutá: `rola: 'Scrum master'` namiesto `todo('rola')`.
+  Kým niekto rolu nemá, stránka ukáže pri tíme štítok „roly doplníme“.
 - Fotky na stránke zámerne nie sú; každého člena zastupujú obrysové iniciály z mena a priezviska.
 
 ## Pravidlá pre texty
