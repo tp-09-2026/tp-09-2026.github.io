@@ -4,16 +4,16 @@
  * Rolu dopíš, keď je naisto dohodnutá (rola: 'Scrum master'). Kým ju niekto nemá,
  * stránka ukáže štítok „roly doplníme".
  */
-import { todo, type Clen, type Osoba } from './types';
+import type { Clen, Osoba } from './types';
 
 export const clenovia: Clen[] = [
-  { meno: 'Viktor Bejtic', rola: todo('rola') },
-  { meno: 'Martin Demčák', rola: todo('rola') },
-  { meno: 'Adam Strelec', rola: todo('rola') },
-  { meno: 'Nikola Šašinková Slivková', rola: todo('rola') },
+  { meno: 'Viktor Bejtic', rola: 'Backend developer' },
+  { meno: 'Martin Demčák', rola: 'Backend developer' },
+  { meno: 'Adam Strelec', rola: 'Frontend developer' },
+  { meno: 'Nikola Šašinková Slivková', rola: 'Business analyst · Scrum master' },
   { meno: 'Adela Škulavíková', rola: 'DevOps engineer' },
-  { meno: 'Martin Štefanko', rola: todo('rola') },
-  { meno: 'Ladislav Štefún', rola: todo('rola') },
+  { meno: 'Martin Štefanko', rola: 'Team lead · Frontend developer' },
+  { meno: 'Ladislav Štefún', rola: 'Backend developer · QA engineer' },
 ];
 
 export const vedenie: { veduci: Osoba; productOwner: Osoba } = {
