@@ -87,6 +87,55 @@ describe('normalizeJira', () => {
   });
 });
 
+describe('normalizeJira after a sprint is closed', () => {
+  const done = (at: string) => ({ status: { name: 'Done', statusCategory: { key: 'done' } }, statuscategorychangedate: at });
+  const inProgress = { status: { name: 'In Progress', statusCategory: { key: 'indeterminate' } } };
+  // sprint 1 was closed on Mon 19. 10. at 12:30; sprint 2 is running
+  const sprints: RawSprint[] = [
+    { id: 2, name: 'SCRUM Sprint 2', state: 'active', startDate: '2026-10-19T12:44:00.000Z', endDate: '2026-11-02T12:44:00.000Z' },
+    { id: 1, name: 'SCRUM Sprint 1', state: 'closed', startDate: '2026-10-05T11:00:00.000Z', endDate: '2026-10-19T11:00:00.000Z', completeDate: '2026-10-19T12:30:00.000Z' },
+  ];
+  const sprint1: RawIssue[] = [
+    // finished a few seconds before the sprint was closed (Jira's own format with +0200)
+    { key: 'S-1', fields: { summary: 'Stihnutá', ...done('2026-10-19T14:29:50.000+0200') } },
+    // carried over to sprint 2 and finished there
+    { key: 'S-2', fields: { summary: 'Frontend', ...done('2026-10-25T10:00:00.000Z') } },
+    // carried over to sprint 2, still in progress
+    { key: 'S-3', fields: { summary: 'Backend', ...inProgress } },
+    // back to the backlog, still in progress
+    { key: 'S-4', fields: { summary: 'Špecifikácia', ...inProgress } },
+    // cancelled during sprint 1
+    { key: 'S-5', fields: { summary: 'Mlynček C', status: { name: 'Zrušené', statusCategory: { key: 'done' } }, statuscategorychangedate: '2026-10-10T10:00:00.000Z' } },
+  ];
+  const sprint2: RawIssue[] = [sprint1[1]!, sprint1[2]!, { key: 'S-6', fields: { summary: 'Nová', ...inProgress } }];
+  const data = normalizeJira(sprints, { 1: sprint1, 2: sprint2 }, { podulohy: false, zrusene: ['zrušené'] });
+  const byId = (id: number) => data.sprinty.find((s) => s.id === id)?.ulohy;
+
+  it('keeps the state each task ended the closed sprint with', () => {
+    expect(byId(1)).toEqual([
+      { kluc: 'S-1', text: 'Stihnutá', stav: 'hotova' },
+      { kluc: 'S-2', text: 'Frontend', stav: 'presunuta', presunutaDo: 2 },
+      { kluc: 'S-3', text: 'Backend', stav: 'presunuta', presunutaDo: 2 },
+      { kluc: 'S-4', text: 'Špecifikácia', stav: 'nesplnena' },
+      { kluc: 'S-5', text: 'Mlynček C', stav: 'zrusena' },
+    ]);
+  });
+
+  it('shows the running sprint as it is now and marks tasks carried over into it', () => {
+    expect(byId(2)).toEqual([
+      { kluc: 'S-2', text: 'Frontend', stav: 'hotova', zoSprintu: 1 },
+      { kluc: 'S-3', text: 'Backend', stav: 'rozpracovana', zoSprintu: 1 },
+      { kluc: 'S-6', text: 'Nová', stav: 'rozpracovana' },
+    ]);
+  });
+
+  it('turns the carried-over sprint ids into sprint numbers', () => {
+    const merged = mergeSprints([], data);
+    expect(merged.find((s) => s.cislo === 1)?.ulohy?.[1]).toEqual({ text: 'Frontend', stav: 'presunuta', presunutaDo: 2 });
+    expect(merged.find((s) => s.cislo === 2)?.ulohy?.[0]).toEqual({ text: 'Frontend', stav: 'hotova', zoSprintu: 1 });
+  });
+});
+
 describe('Jira dates', () => {
   it('uses the Bratislava calendar day', () => {
     expect(localDay('2026-10-06T22:30:00.000Z')).toBe('2026-10-07');

@@ -1,4 +1,4 @@
-import type { Semester, Sprint } from '../content/types';
+import type { Poduloha, Semester, Sprint, Uloha } from '../content/types';
 import { addDays, daysBetween, dayOfMonth, isWeekend, weekday, type ISODate } from './dates';
 
 export type SprintStatus = 'hotovy' | 'prebieha' | 'planovany';
@@ -52,6 +52,49 @@ export function sprintsUpTo(sprints: readonly Sprint[], last: Sprint): Sprint[] 
 
 export function sprintForDate(sprints: readonly Sprint[], date: ISODate): Sprint | undefined {
   return sprints.find((s) => s.od <= date && date <= s.do);
+}
+
+export interface SprintOutcome {
+  /** finished in this sprint */
+  splnene: Uloha[];
+  /** not finished: the ones carried over to a later sprint first */
+  nesplnene: Uloha[];
+  /** cancelled; they count neither as finished nor as unfinished */
+  zrusene: Uloha[];
+}
+
+/**
+ * What happened to the tasks of a finished sprint. The finished ones are its results
+ * (unless the results are written by hand), the score counts only the tasks that were
+ * really meant to be done, so cancelled ones are kept apart.
+ */
+export function sprintOutcome(sprint: Pick<Sprint, 'ulohy'>): SprintOutcome {
+  const tasks = sprint.ulohy ?? [];
+  return {
+    splnene: tasks.filter((u) => u.stav === 'hotova'),
+    nesplnene: [
+      ...tasks.filter((u) => u.stav === 'presunuta'),
+      ...tasks.filter((u) => u.stav !== 'hotova' && u.stav !== 'presunuta' && u.stav !== 'zrusena'),
+    ],
+    zrusene: tasks.filter((u) => u.stav === 'zrusena'),
+  };
+}
+
+/**
+ * One line about what happened to a task, e.g. "presunutá do šprintu 2", for readers
+ * who cannot open Jira. `finished` = the sprint is over, so a task that is still open
+ * is "nedokončená" rather than in progress.
+ */
+export function taskFate(uloha: Poduloha & Pick<Uloha, 'presunutaDo' | 'zoSprintu'>, finished: boolean): string | undefined {
+  const from = uloha.zoSprintu === undefined ? undefined : `zo šprintu ${uloha.zoSprintu}`;
+  let what: string | undefined;
+  if (uloha.stav === 'presunuta') {
+    what = uloha.presunutaDo === undefined ? 'presunutá do ďalšieho šprintu' : `presunutá ${from ? 'ďalej ' : ''}do šprintu ${uloha.presunutaDo}`;
+  } else if (uloha.stav === 'nesplnena') what = 'nedokončená, vrátená do backlogu';
+  else if (uloha.stav === 'zrusena') what = 'zrušená';
+  else if (finished && uloha.stav !== 'hotova') what = 'nedokončená';
+  if (!from) return what;
+  return what ? `${from}, ${what}` : `presunutá ${from}`;
 }
 
 export interface CalendarCell {

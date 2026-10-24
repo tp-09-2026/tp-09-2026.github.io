@@ -31,7 +31,7 @@ Pre náhľad iného dňa pridaj do URL `?dnes=RRRR-MM-DD` (napr. `http://localho
 | Čo chceš zmeniť | Súbor |
 | --- | --- |
 | názvy šprintov, zhrnutie, výsledky, oba semestre, dôležité termíny | `src/content/sprinty.ts` |
-| dátumy, cieľ a úlohy šprintov | **v Jire** (stiahnu sa samé, pozri nižšie) |
+| dátumy, cieľ a úlohy šprintov (hotové úlohy = výsledky) | **v Jire** (stiahnu sa samé, pozri nižšie) |
 | členovia, roly, vedúci, product owner | `src/content/tim.ts` |
 | texty o projekte, história ECEH, ciele na tento rok, kontakt a odkazy | `src/content/projekt.ts` |
 | zápisnice, retrospektívy, metodiky, prezentácie, dokumentácia | PDF do `src/content/dokumenty/<kategória>/` |
@@ -61,14 +61,24 @@ Zlý názov alebo neznámy priečinok zhodí `npm test`, takže sa nenasadí roz
   - Na stránku idú **len úlohy so štítkom (label) `TP-09`**. Úloha bez štítku ostane len v Jire
     (napr. interné veci). Nastavuje sa v `src/content/jira.ts` (`stitok`).
   - Stav úlohy podľa kategórie stavu v Jire: To Do → čaká, In Progress → rozpracovaná, Done → hotová.
+  - **Zrušená úloha:** daj jej v Jire stav „Zrušené“ (zoznam názvov je v `src/content/jira.ts`, `zruseneStavy`).
+    Na stránke je prečiarknutá a neráta sa do splnených ani do skóre. Zmazaná úloha alebo úloha
+    vybraná zo šprintu zo stránky jednoducho zmizne.
+  - **Po uzavretí šprintu v Jire** sa každá jeho úloha ukáže tak, ako šprint skončila, nie podľa dnešného stavu:
+    - hotová len vtedy, keď sa dokončila pred uzavretím šprintu (podľa dátumu zmeny stavu v Jire),
+    - „presunutá do šprintu N“, keď je aj v neskoršom šprinte; tam má poznámku „presunutá zo šprintu N“,
+    - „nedokončená, vrátená do backlogu“, keď nie je hotová ani v žiadnom neskoršom šprinte.
+  - Karta skončeného šprintu delí úlohy na **Splnené**, **Nesplnené** a **Zrušené**; skóre „splnené X z Y“ ráta
+    splnené a nesplnené, zrušené nie.
   - Podúlohy (subtasky) sa ukážu pod svojou úlohou: riadok úlohy sa dá rozkliknúť a vidno v ňom „hotové/všetky“.
     Štítok potrebuje len nadradená úloha; podúlohy úlohy bez štítku sa nezverejnia.
     Vypína sa v `src/content/jira.ts` (`zobrazitPodulohy: false`).
   - Na stránku ide len názov úlohy a jej stav. Mená ľudí ani popisy nie, ale názvy úloh sú verejné, tak ich tak aj píšte.
 - **V `src/content/sprinty.ts` (`sprintyRucne`) píš len to, čo Jira nemá:**
   - `nazov` (čitateľný názov, napr. „Rozbeh tímu a projektu“),
-  - `zhrnutie` (jedna veta pre kartu hore na stránke),
-  - `vysledky` po skončení šprintu.
+  - `zhrnutie` (jedna veta pre kartu hore na stránke; bez neho sa ukáže cieľ),
+  - `vysledky` po skončení šprintu, **len ak ich chceš povedať inak**. Bez nich stránka pri skončenom
+    šprinte vypíše ako výsledky jeho hotové úlohy (z Jiry).
 - Šprinty, ktoré v Jire ešte nie sú, sú plán; ak sa prekrývajú so skutočným šprintom z Jiry, posunú sa.
 - Bez prístupu k Jire (lokálne bez tokenu) stránka použije len ručné údaje vrátane `ulohy` a `ciel`.
 - Po skončení šprintu nahraj retrospektívu (PDF).

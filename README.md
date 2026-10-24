@@ -18,7 +18,8 @@ Stránka beží na http://localhost:5173.
 
 Všetok obsah je v priečinku `src/content/`:
 
-- **šprinty:** dátumy, cieľ a úlohy sa sťahujú z Jiry, názov a výsledky sú v `sprinty.ts`
+- **šprinty:** dátumy, cieľ a úlohy sa sťahujú z Jiry a hotové úlohy sa po šprinte ukážu ako výsledky;
+  názov (a prípadne vlastné výsledky) je v `sprinty.ts`
 - **tím:** `tim.ts`
 - **texty a odkazy:** `projekt.ts`
 - **PDF dokumenty:** priečinok `dokumenty/`

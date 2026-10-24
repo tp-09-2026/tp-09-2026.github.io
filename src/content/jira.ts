@@ -17,4 +17,9 @@ export const jiraNastavenie = {
    * ostane len v Jire. null = zobraziť všetky úlohy šprintu.
    */
   stitok: 'TP-09' as string | null,
+  /**
+   * Stavy v Jire, ktoré znamenajú zrušenú úlohu (veľkosť písmen nehrá rolu). Taká úloha
+   * je na stránke prečiarknutá a neráta sa do splnených ani do skóre šprintu.
+   */
+  zruseneStavy: ['Zrušené', 'Zrušená', "Won't Do", 'Cancelled', 'Canceled'] as string[],
 };

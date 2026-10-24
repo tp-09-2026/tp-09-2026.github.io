@@ -18,12 +18,14 @@ import {
   sprintsUpTo,
   sprintLength,
   sprintNumber,
+  sprintOutcome,
   sprintStatus,
+  taskFate,
   type Focus,
 } from '../lib/sprints';
 import { typo } from '../lib/typography';
 import { StatusLabel } from './Hero';
-import { Icon, Num, Sheet, TodoBadge, Value, cx } from './ui';
+import { Icon, Num, Sheet, TodoBadge, Value, cx, type IconName } from './ui';
 import './Progress.css';
 
 const DNI = ['Po', 'Ut', 'St', 'Št', 'Pi', 'So', 'Ne'];
@@ -215,24 +217,14 @@ function CurrentSprint({
             {sprint.ulohy && sprint.ulohy.length > 0 ? (
               <ul className="tasks">
                 {sprint.ulohy.map((u, i) => (
-                  <TaskRow key={`${i}-${u.text}`} uloha={u} />
+                  <TaskRow key={`${i}-${u.text}`} uloha={u} finished={view.kind === 'po'} />
                 ))}
               </ul>
             ) : (
               <p className="empty">Úlohy doplníme na plánovaní šprintu.</p>
             )}
             {view.kind === 'po' && sprint.vysledky && sprint.vysledky.length > 0 && (
-              <>
-                <span className="lbl res-h">Výsledky</span>
-                <ul className="res">
-                  {sprint.vysledky.map((v) => (
-                    <li key={v}>
-                      <Icon name="check" />
-                      {typo(v)}
-                    </li>
-                  ))}
-                </ul>
-              </>
+              <OutcomeList title="Výsledky" items={handWritten(sprint.vysledky)} className="res-h" />
             )}
           {sprint.ulohyPoznamka && (
               <p className="tasks-note">
@@ -311,20 +303,50 @@ function CurrentSprint({
   );
 }
 
-const STAV_TEXT: Record<StavUlohy, string> = { hotova: 'hotová', rozpracovana: 'rozpracovaná', caka: 'čaká' };
+const STAV_TEXT: Record<StavUlohy, string> = {
+  hotova: 'hotová',
+  rozpracovana: 'rozpracovaná',
+  caka: 'čaká',
+  zrusena: 'zrušená',
+  presunuta: 'presunutá',
+  nesplnena: 'nesplnená',
+};
 
-function stateClass(stav: StavUlohy): string | false {
-  return (stav === 'hotova' && 't-done') || (stav === 'rozpracovana' && 't-wip');
+const STAV_TRIEDA: Partial<Record<StavUlohy, string>> = {
+  hotova: 't-done',
+  rozpracovana: 't-wip',
+  zrusena: 't-cancel',
+  presunuta: 't-left',
+  nesplnena: 't-left',
+};
+
+/** Icon in the checkbox; a task still open has none. */
+const STAV_IKONA: Partial<Record<StavUlohy, IconName>> = { hotova: 'check', presunuta: 'next', nesplnena: 'back', zrusena: 'x' };
+
+type UlohaAleboPoduloha = Poduloha & Pick<Uloha, 'presunutaDo' | 'zoSprintu'>;
+
+/** Text of a task with a line under it saying what happened to it, if anything did. */
+function TaskText({ uloha, fate }: { uloha: UlohaAleboPoduloha; fate: string | undefined }) {
+  return (
+    <>
+      <span className="tt">{typo(uloha.text)}</span>
+      {fate && <span className="fate">{fate}</span>}
+    </>
+  );
 }
 
 /** Checkbox, text and state of one task or subtask. */
-function TaskState({ uloha }: { uloha: Poduloha }) {
+function TaskState({ uloha, finished }: { uloha: UlohaAleboPoduloha; finished: boolean }) {
+  const icon = STAV_IKONA[uloha.stav];
+  const fate = taskFate(uloha, finished);
   return (
     <>
-      <span className="ck">{uloha.stav === 'hotova' && <Icon name="check" />}</span>
-      <span className="tx">{typo(uloha.text)}</span>
-      <span className="sr">{STAV_TEXT[uloha.stav]}</span>
-      {uloha.stav === 'rozpracovana' && (
+      <span className="ck">{icon && <Icon name={icon} />}</span>
+      <span className="tx">
+        <TaskText uloha={uloha} fate={fate} />
+      </span>
+      {fate !== STAV_TEXT[uloha.stav] && <span className="sr">{STAV_TEXT[uloha.stav]}</span>}
+      {uloha.stav === 'rozpracovana' && !finished && (
         <span className="live" aria-hidden="true">
           prebieha
         </span>
@@ -335,16 +357,16 @@ function TaskState({ uloha }: { uloha: Poduloha }) {
 
 /**
  * One task. A task with subtasks from Jira is a button: clicking it opens the
- * list of its subtasks with their states.
+ * list of its subtasks with their states. `finished` = the sprint is over.
  */
-function TaskRow({ uloha }: { uloha: Uloha }) {
+function TaskRow({ uloha, finished }: { uloha: Uloha; finished: boolean }) {
   const [open, setOpen] = useState(false);
   const subtasks = uloha.podulohy ?? [];
   if (subtasks.length === 0) {
     return (
       <li>
-        <div className={cx('task-row', stateClass(uloha.stav))}>
-          <TaskState uloha={uloha} />
+        <div className={cx('task-row', STAV_TRIEDA[uloha.stav])}>
+          <TaskState uloha={uloha} finished={finished} />
         </div>
       </li>
     );
@@ -354,11 +376,11 @@ function TaskRow({ uloha }: { uloha: Uloha }) {
     <li>
       <button
         type="button"
-        className={cx('task-row', 'has-sub', stateClass(uloha.stav))}
+        className={cx('task-row', 'has-sub', STAV_TRIEDA[uloha.stav])}
         aria-expanded={open}
         onClick={() => setOpen(!open)}
       >
-        <TaskState uloha={uloha} />
+        <TaskState uloha={uloha} finished={finished} />
         <span className="sub-count mono" title="hotové podúlohy">
           {done}/{subtasks.length}
         </span>
@@ -367,13 +389,49 @@ function TaskRow({ uloha }: { uloha: Uloha }) {
       {open && (
         <ul className="subtasks">
           {subtasks.map((p, i) => (
-            <li key={`${i}-${p.text}`} className={cx('task-row', 'subtask', stateClass(p.stav))}>
-              <TaskState uloha={p} />
+            <li key={`${i}-${p.text}`} className={cx('task-row', 'subtask', STAV_TRIEDA[p.stav])}>
+              <TaskState uloha={p} finished={finished} />
             </li>
           ))}
         </ul>
       )}
     </li>
+  );
+}
+
+/** How many rows a group of a finished sprint shows before the rest is opened. */
+const NAHLAD_VYSLEDKOV = 4;
+
+/**
+ * One group of a finished sprint ("Splnené", "Nesplnené", …), each task with a line
+ * saying what happened to it. A long list shows only the first few and a button opens
+ * the rest; hiding a single row would not save anything, so then all show.
+ */
+function OutcomeList({ title, items, className }: { title: string; items: readonly Uloha[]; className?: string }) {
+  const [open, setOpen] = useState(false);
+  const collapsible = items.length > NAHLAD_VYSLEDKOV + 1;
+  const shown = collapsible && !open ? items.slice(0, NAHLAD_VYSLEDKOV) : items;
+  return (
+    <div className={cx('out-g', className)}>
+      <span className="lbl">{title}</span>
+      <ul className="res">
+        {shown.map((u, i) => (
+          <li key={`${i}-${u.text}`} className={STAV_TRIEDA[u.stav]}>
+            <Icon name={STAV_IKONA[u.stav] ?? 'dash'} />
+            <span>
+              {/* under the "Zrušené" heading a plain "zrušená" would only repeat it */}
+              <TaskText uloha={u} fate={u.stav === 'zrusena' && u.zoSprintu === undefined ? undefined : taskFate(u, true)} />
+            </span>
+          </li>
+        ))}
+      </ul>
+      {collapsible && (
+        <button type="button" className="res-more" aria-expanded={open} onClick={() => setOpen(!open)}>
+          {open ? 'zobraziť menej' : `zobraziť všetky · ${items.length}`}
+          <Icon name="right" className="chev" />
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -421,9 +479,20 @@ function SprintLog({ dnes }: { dnes: ISODate }) {
   );
 }
 
+/** Results written by hand in sprinty.ts, shown like finished tasks. */
+function handWritten(vysledky: readonly string[]): Uloha[] {
+  return vysledky.map((text) => ({ text, stav: 'hotova' }));
+}
+
+function cancelledNote(n: number): string {
+  if (n === 1) return '1 zrušená úloha sa neráta';
+  if (n < 5) return `${n} zrušené úlohy sa nerátajú`;
+  return `${n} zrušených úloh sa neráta`;
+}
+
 function DoneSprint({ sprint }: { sprint: Sprint }) {
-  const tasks = sprint.ulohy ?? [];
-  const finished = tasks.filter((t) => t.stav === 'hotova').length;
+  const { splnene, nesplnene, zrusene } = sprintOutcome(sprint);
+  const planned = splnene.length + nesplnene.length;
   const docs = docsInSprint(sprint);
   return (
     <article className="lg">
@@ -447,30 +516,35 @@ function DoneSprint({ sprint }: { sprint: Sprint }) {
           </p>
         )}
         <div className="lg-grid">
-          {sprint.vysledky && sprint.vysledky.length > 0 ? (
-            <ul className="res">
-              {sprint.vysledky.map((v) => (
-                <li key={v}>
-                  <Icon name="check" />
-                  {typo(v)}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>
-              <TodoBadge text="výsledky doplníme" />
-            </p>
-          )}
-          {tasks.length > 0 ? (
+          <div>
+            {sprint.vysledky && sprint.vysledky.length > 0 ? (
+              <OutcomeList title="Výsledky" items={handWritten(sprint.vysledky)} />
+            ) : splnene.length > 0 ? (
+              <OutcomeList title="Splnené" items={splnene} />
+            ) : planned > 0 ? (
+              <div className="out-g">
+                <span className="lbl">Splnené</span>
+                <p className="out-none">Žiadna úloha sa v tomto šprinte nedokončila.</p>
+              </div>
+            ) : (
+              <p>
+                <TodoBadge text="výsledky doplníme" />
+              </p>
+            )}
+            {nesplnene.length > 0 && <OutcomeList title="Nesplnené" items={nesplnene} />}
+            {zrusene.length > 0 && <OutcomeList title="Zrušené" items={zrusene} />}
+          </div>
+          {planned > 0 ? (
             <div className="score">
               <span className="meter" aria-hidden="true">
-                {tasks.map((_, i) => (
-                  <i key={i} className={i < finished ? 'on' : undefined} />
+                {Array.from({ length: planned }, (_, i) => (
+                  <i key={i} className={i < splnene.length ? 'on' : undefined} />
                 ))}
               </span>
               <p>
-                splnené {finished} z&nbsp;{tasks.length}
+                splnené {splnene.length} z&nbsp;{planned}
               </p>
+              {zrusene.length > 0 && <p className="score-note">{cancelledNote(zrusene.length)}</p>}
             </div>
           ) : (
             <div />

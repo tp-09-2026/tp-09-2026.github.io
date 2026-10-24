@@ -4,8 +4,9 @@
  * podľa dátumu.
  *
  * Dátumy, cieľ a úlohy šprintov sa pri builde berú z Jiry (pozri jira.ts).
- * Tu píš len to, čo Jira nemá: čitateľný názov, jednoriadkové zhrnutie a výsledky
- * po skončení šprintu. Šprinty, ktoré v Jire ešte nie sú, slúžia ako plán.
+ * Tu píš len to, čo Jira nemá: čitateľný názov a jednoriadkové zhrnutie. Výsledky
+ * skončeného šprintu sú jeho hotové úlohy; `vysledky` napíš, len ak ich chceš povedať
+ * inak. Šprinty, ktoré v Jire ešte nie sú, slúžia ako plán.
  */
 import { mergeSprints } from '../lib/jiraMerge';
 import { jiraData } from './jiraData';

@@ -11,7 +11,9 @@ import {
   semesterWeeks,
   sprintDay,
   sprintLength,
+  sprintOutcome,
   sprintStatus,
+  taskFate,
 } from './sprints';
 
 const s1: Sprint = { cislo: 1, od: '2026-09-28', do: '2026-10-11' };
@@ -110,5 +112,50 @@ describe('sprintsUpTo', () => {
   it('lists earlier sprints oldest first and stops at the given one', () => {
     expect(sprintsUpTo([s4, s2, s1], s2)).toEqual([s1, s2]);
     expect(sprintsUpTo([s4, s2, s1], s1)).toEqual([s1]);
+  });
+});
+
+describe('sprintOutcome', () => {
+  const ulohy: Sprint['ulohy'] = [
+    { text: 'Spustiť stránku', stav: 'hotova' },
+    { text: 'Nasadiť backend', stav: 'nesplnena' },
+    { text: 'Mlynček C', stav: 'zrusena' },
+    { text: 'Návrh frontendu', stav: 'presunuta', presunutaDo: 2 },
+    { text: 'Prístupy do Jiry', stav: 'hotova', zoSprintu: 0 },
+    { text: 'Testy', stav: 'rozpracovana' },
+  ];
+
+  it('splits the tasks into finished, unfinished (carried over first) and cancelled', () => {
+    const { splnene, nesplnene, zrusene } = sprintOutcome({ ulohy });
+    expect(splnene.map((u) => u.text)).toEqual(['Spustiť stránku', 'Prístupy do Jiry']);
+    expect(nesplnene.map((u) => u.text)).toEqual(['Návrh frontendu', 'Nasadiť backend', 'Testy']);
+    expect(zrusene.map((u) => u.text)).toEqual(['Mlynček C']);
+  });
+
+  it('is empty without tasks', () => {
+    expect(sprintOutcome({})).toEqual({ splnene: [], nesplnene: [], zrusene: [] });
+  });
+});
+
+describe('taskFate', () => {
+  it('says where an unfinished task went', () => {
+    expect(taskFate({ text: 'x', stav: 'presunuta', presunutaDo: 2 }, true)).toBe('presunutá do šprintu 2');
+    expect(taskFate({ text: 'x', stav: 'presunuta' }, true)).toBe('presunutá do ďalšieho šprintu');
+    expect(taskFate({ text: 'x', stav: 'nesplnena' }, true)).toBe('nedokončená, vrátená do backlogu');
+    expect(taskFate({ text: 'x', stav: 'zrusena' }, false)).toBe('zrušená');
+  });
+
+  it('says where a carried-over task came from', () => {
+    expect(taskFate({ text: 'x', stav: 'hotova', zoSprintu: 1 }, true)).toBe('presunutá zo šprintu 1');
+    expect(taskFate({ text: 'x', stav: 'rozpracovana', zoSprintu: 3 }, false)).toBe('presunutá zo šprintu 3');
+    expect(taskFate({ text: 'x', stav: 'presunuta', zoSprintu: 2, presunutaDo: 4 }, true)).toBe(
+      'zo šprintu 2, presunutá ďalej do šprintu 4',
+    );
+  });
+
+  it('calls an open task unfinished only once the sprint is over', () => {
+    expect(taskFate({ text: 'x', stav: 'rozpracovana' }, true)).toBe('nedokončená');
+    expect(taskFate({ text: 'x', stav: 'rozpracovana' }, false)).toBeUndefined();
+    expect(taskFate({ text: 'x', stav: 'hotova' }, true)).toBeUndefined();
   });
 });

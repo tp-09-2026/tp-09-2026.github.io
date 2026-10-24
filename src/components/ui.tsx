@@ -18,7 +18,11 @@ export type IconName =
   | 'moon'
   | 'sun'
   | 'left'
-  | 'right';
+  | 'right'
+  | 'next'
+  | 'back'
+  | 'dash'
+  | 'x';
 
 export function Icon({ name, className }: { name: IconName; className?: string }) {
   return (

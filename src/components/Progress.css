@@ -444,6 +444,33 @@ button.task-row[aria-expanded='true'] .chev {
 .t-wip .live {
   font-size: 12.5px;
 }
+/* after the sprint: carried over or back in the backlog (arrow), cancelled (cross) */
+.t-left .ck {
+  border-style: dashed;
+  color: var(--fg-2);
+}
+.t-left .tt {
+  color: var(--fg-2);
+}
+.t-cancel .ck {
+  color: var(--fg-3);
+}
+.t-cancel .tt {
+  color: var(--fg-3);
+  text-decoration: line-through;
+  text-decoration-color: var(--fg-3);
+}
+/* what happened to a task: "presunutá do šprintu 2", "zo šprintu 1", … */
+.tt,
+.fate {
+  display: block;
+}
+.fate {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--fg-3);
+}
 .cal {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -638,9 +665,47 @@ button.task-row[aria-expanded='true'] .chev {
   line-height: 1.45;
 }
 .res .i {
+  flex: none;
   width: 16px;
   height: 16px;
   margin-top: 3px;
+}
+/* a finished sprint in groups: Splnené / Nesplnené / Zrušené */
+.out-g + .out-g {
+  margin-top: 26px;
+}
+.out-g > .lbl {
+  margin-bottom: 8px;
+}
+.res li:not(.t-done) .i {
+  color: var(--fg-3);
+}
+.res li:not(.t-done) .tt {
+  color: var(--fg-2);
+}
+.out-none {
+  font-size: 15px;
+  color: var(--fg-2);
+}
+/* "zobraziť všetky" under a long list of results */
+.res-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-2);
+  transition: color 0.2s;
+}
+.res-more:hover {
+  color: var(--fg);
+}
+.res-more .chev {
+  transform: rotate(90deg);
+}
+.res-more[aria-expanded='true'] .chev {
+  transform: rotate(-90deg);
 }
 .meter {
   display: flex;
@@ -658,6 +723,12 @@ button.task-row[aria-expanded='true'] .chev {
 .score p {
   font-size: 15px;
   font-weight: 600;
+}
+.score .score-note {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg-3);
 }
 .lg-docs a {
   display: flex;

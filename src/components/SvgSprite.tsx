@@ -56,6 +56,22 @@ export function SvgSprite() {
         <symbol id="i-check" viewBox="0 0 24 24">
           <path d="M20 6 9 17l-5-5" />
         </symbol>
+        {/* task outcomes: carried over, back to the backlog, not finished, cancelled */}
+        <symbol id="i-next" viewBox="0 0 24 24">
+          <path d="M5 12h14" />
+          <path d="m13 6 6 6-6 6" />
+        </symbol>
+        <symbol id="i-back" viewBox="0 0 24 24">
+          <path d="M9 14 4 9l5-5" />
+          <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+        </symbol>
+        <symbol id="i-dash" viewBox="0 0 24 24">
+          <path d="M6 12h12" />
+        </symbol>
+        <symbol id="i-x" viewBox="0 0 24 24">
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </symbol>
         <symbol id="i-kanban" viewBox="0 0 24 24">
           <rect width="18" height="18" x="3" y="3" rx="2" />
           <path d="M8 7v7" />

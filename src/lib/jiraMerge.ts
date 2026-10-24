@@ -31,11 +31,13 @@ export function mergeSprints(manual: readonly Sprint[], data: JiraData | null): 
   const byNumber = new Map(manual.map((s) => [s.cislo, s]));
   const fromJira: Sprint[] = [];
   const ordered = [...data.sprinty].sort((a, b) => (a.od ?? '9999').localeCompare(b.od ?? '9999') || a.id - b.id);
-  ordered.forEach((j, index) => {
-    const cislo = sprintNumberFromName(j.nazov) ?? index + 1;
-    const merged = fromJiraSprint(j, cislo, byNumber.get(cislo));
+  // Jira sprint id → sprint number on the page, also for tasks carried over between sprints
+  const numbers = new Map(ordered.map((j, index) => [j.id, sprintNumberFromName(j.nazov) ?? index + 1]));
+  for (const j of ordered) {
+    const cislo = numbers.get(j.id) ?? 0;
+    const merged = fromJiraSprint(j, cislo, byNumber.get(cislo), numbers);
     if (merged) fromJira.push(merged);
-  });
+  }
 
   const result = [...fromJira];
   const jiraNumbers = new Set(fromJira.map((s) => s.cislo));
@@ -58,14 +60,23 @@ export function mergeSprints(manual: readonly Sprint[], data: JiraData | null): 
   });
 }
 
-/** Jira keys stay out of the page; only the text and state are published. */
-function toUloha(u: JiraUloha): Uloha {
+/** Jira keys stay out of the page; only the text, state and sprint numbers are published. */
+function toUloha(u: JiraUloha, numbers: ReadonlyMap<number, number>): Uloha {
   const uloha: Uloha = { text: u.text, stav: u.stav };
   if (u.podulohy) uloha.podulohy = u.podulohy.map((p) => ({ text: p.text, stav: p.stav }));
+  const to = u.presunutaDo === undefined ? undefined : numbers.get(u.presunutaDo);
+  const from = u.zoSprintu === undefined ? undefined : numbers.get(u.zoSprintu);
+  if (to !== undefined) uloha.presunutaDo = to;
+  if (from !== undefined) uloha.zoSprintu = from;
   return uloha;
 }
 
-function fromJiraSprint(j: JiraSprint, cislo: number, manual: Sprint | undefined): Sprint | undefined {
+function fromJiraSprint(
+  j: JiraSprint,
+  cislo: number,
+  manual: Sprint | undefined,
+  numbers: ReadonlyMap<number, number>,
+): Sprint | undefined {
   const od = j.od ?? manual?.od;
   const end = j.do ?? manual?.do;
   if (!od || !end) return undefined; // a future sprint without dates cannot be placed on the timeline
@@ -75,7 +86,7 @@ function fromJiraSprint(j: JiraSprint, cislo: number, manual: Sprint | undefined
     cislo,
     od,
     do: end,
-    ulohy: hasTasks ? j.ulohy.map(toUloha) : manual?.ulohy,
+    ulohy: hasTasks ? j.ulohy.map((u) => toUloha(u, numbers)) : manual?.ulohy,
     ulohyPoznamka: hasTasks ? undefined : manual?.ulohyPoznamka,
     ulohyZJiry: hasTasks,
   };

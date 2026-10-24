@@ -22,7 +22,8 @@ try {
 }
 
 const PAGE = 50;
-const FIELDS = 'summary,status,issuetype,labels,parent';
+// statuscategorychangedate tells whether a task was finished before its sprint was closed
+const FIELDS = 'summary,status,issuetype,labels,parent,statuscategorychangedate';
 
 const email = process.env.JIRA_EMAIL?.trim();
 const token = process.env.JIRA_API_TOKEN?.trim();
@@ -98,6 +99,7 @@ for (const sprint of rawSprints) {
 const data = normalizeJira(rawSprints, issuesBySprint, {
   podulohy: jiraNastavenie.zobrazitPodulohy,
   stitok: jiraNastavenie.stitok,
+  zrusene: jiraNastavenie.zruseneStavy,
 });
 await writeFile(OUTPUT, `${JSON.stringify(data, null, 2)}\n`);
 

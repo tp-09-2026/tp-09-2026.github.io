@@ -37,7 +37,13 @@ export interface Milnik {
   nazov: string;
 }
 
-export type StavUlohy = 'hotova' | 'rozpracovana' | 'caka';
+/**
+ * hotova / rozpracovana / caka: the state in Jira right now.
+ * zrusena: closed with one of the "cancelled" statuses (jira.ts, zruseneStavy).
+ * After a sprint is closed in Jira its tasks keep the state they ended the sprint with:
+ * presunuta = carried over to a later sprint, nesplnena = not finished and back in the backlog.
+ */
+export type StavUlohy = 'hotova' | 'rozpracovana' | 'caka' | 'zrusena' | 'presunuta' | 'nesplnena';
 
 export interface Poduloha {
   text: string;
@@ -49,6 +55,10 @@ export interface Uloha {
   stav: StavUlohy;
   /** subtasks from Jira, shown when the task is opened on the page */
   podulohy?: Poduloha[];
+  /** number of the sprint the unfinished task was carried over to (from Jira) */
+  presunutaDo?: number;
+  /** number of the earlier sprint the task was carried over from (from Jira) */
+  zoSprintu?: number;
 }
 
 export interface Sprint {
@@ -66,7 +76,7 @@ export interface Sprint {
   ulohyPoznamka?: Todo;
   /** set automatically when the tasks come from Jira (do not write by hand) */
   ulohyZJiry?: boolean;
-  /** what we actually delivered; fill in after the sprint */
+  /** what we actually delivered; without it a finished sprint lists its finished tasks */
   vysledky?: string[];
   /** link to the sprint (board or report) in Jira */
   jira?: Maybe<string>;
