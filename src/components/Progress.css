@@ -894,3 +894,97 @@ button.task-row[aria-expanded='true'] .chev {
     font-size: 25px;
   }
 }
+
+/* tasks on the sprint card: a summary bar, then the tasks grouped by state */
+.summary {
+  margin-bottom: 6px;
+}
+.sumbar {
+  display: flex;
+  gap: 3px;
+  height: 8px;
+  margin-bottom: 12px;
+}
+.sumbar i {
+  flex-basis: 0;
+  border-radius: 2px;
+}
+.sb-hotova {
+  background: var(--fg);
+}
+.sb-rozpracovana {
+  background: var(--mline);
+}
+.sb-caka {
+  background: var(--line-2);
+}
+.sb-nesplnena,
+.sb-presunuta {
+  background: repeating-linear-gradient(135deg, var(--line-3) 0 3px, transparent 3px 6px);
+}
+.sb-zrusena {
+  background: var(--fg-4);
+}
+.sumleg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-bottom: 14px;
+  font-size: 13.5px;
+  color: var(--fg-2);
+}
+.sumleg span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.sumleg i,
+.tgroup-h > i {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.sumleg b {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--fg);
+}
+.tgroup + .tgroup {
+  margin-top: 6px;
+}
+.tgroup-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 0;
+  text-align: left;
+  cursor: pointer;
+}
+.tgroup-t {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+.tgroup-h[aria-expanded='true'] .chev {
+  transform: rotate(90deg);
+}
+.tgroup .tasks {
+  margin-bottom: 10px;
+}
+.tgroup .res-more {
+  margin: 0 0 12px;
+}
+/* denser rows than a single list, so more of the sprint fits on screen */
+.tasklist .task-row {
+  min-height: 42px;
+  padding: 6px 0;
+  font-size: 15.5px;
+}
+.tasklist .ck {
+  width: 19px;
+  height: 19px;
+}

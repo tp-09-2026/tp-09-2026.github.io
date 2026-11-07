@@ -1,4 +1,4 @@
-import type { Poduloha, Semester, Sprint, Uloha } from '../content/types';
+import type { Poduloha, Semester, Sprint, StavUlohy, Uloha } from '../content/types';
 import { addDays, daysBetween, dayOfMonth, isWeekend, weekday, type ISODate } from './dates';
 
 export type SprintStatus = 'hotovy' | 'prebieha' | 'planovany';
@@ -193,4 +193,22 @@ export function semesterPosition(semester: Semester, date: ISODate): number {
 /** "Šprint 01" style two-digit number. */
 export function sprintNumber(cislo: number): string {
   return String(cislo).padStart(2, '0');
+}
+
+/**
+ * First rows of a long list; the rest waits behind a "zobraziť všetky" button.
+ * Hiding a single row would save nothing, so a list at most one row over the
+ * limit shows whole and has no button.
+ */
+export function listPreview<T>(items: readonly T[], limit: number, open: boolean): { shown: readonly T[]; collapsible: boolean } {
+  const collapsible = items.length > limit + 1;
+  return { shown: collapsible && !open ? items.slice(0, limit) : items, collapsible };
+}
+
+/** Order of the task groups on the card: work going on first, cancelled last. */
+export const PORADIE_STAVOV: readonly StavUlohy[] = ['rozpracovana', 'caka', 'hotova', 'nesplnena', 'presunuta', 'zrusena'];
+
+/** Tasks split by state in PORADIE_STAVOV order; empty groups are left out. */
+export function groupTasks<T extends { stav: StavUlohy }>(ulohy: readonly T[]): { stav: StavUlohy; ulohy: T[] }[] {
+  return PORADIE_STAVOV.map((stav) => ({ stav, ulohy: ulohy.filter((u) => u.stav === stav) })).filter((g) => g.ulohy.length > 0);
 }

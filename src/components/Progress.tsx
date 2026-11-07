@@ -10,6 +10,8 @@ import {
   calendarCells,
   currentSemester,
   focusSprint,
+  groupTasks,
+  listPreview,
   semesterPosition,
   semesterSegments,
   semesterWeek,
@@ -215,11 +217,7 @@ function CurrentSprint({
               )}
             </p>
             {sprint.ulohy && sprint.ulohy.length > 0 ? (
-              <ul className="tasks">
-                {sprint.ulohy.map((u, i) => (
-                  <TaskRow key={`${i}-${u.text}`} uloha={u} finished={view.kind === 'po'} />
-                ))}
-              </ul>
+              <TaskList ulohy={sprint.ulohy} finished={view.kind === 'po'} />
             ) : (
               <p className="empty">Úlohy doplníme na plánovaní šprintu.</p>
             )}
@@ -399,6 +397,92 @@ function TaskRow({ uloha, finished }: { uloha: Uloha; finished: boolean }) {
   );
 }
 
+/** How many tasks a group shows before the rest is opened; only a really long group gets shortened. */
+const NAHLAD_SKUPINY = 10;
+
+/** "zobraziť všetky · 26" / "zobraziť menej" under a shortened list. */
+function MoreButton({ open, total, onToggle }: { open: boolean; total: number; onToggle: () => void }) {
+  return (
+    <button type="button" className="res-more" aria-expanded={open} onClick={onToggle}>
+      {open ? 'zobraziť menej' : `zobraziť všetky · ${total}`}
+      <Icon name="right" className="chev" />
+    </button>
+  );
+}
+
+/** Group headings and legend, plural. */
+const STAV_SKUPINA: Record<StavUlohy, string> = {
+  rozpracovana: 'Rozpracované',
+  caka: 'Čakajú',
+  hotova: 'Hotové',
+  nesplnena: 'Nesplnené',
+  presunuta: 'Presunuté',
+  zrusena: 'Zrušené',
+};
+
+type Skupina = ReturnType<typeof groupTasks<Uloha>>[number];
+
+/** Bar of the sprint's progress, one part per state, with a legend of the counts. */
+function TaskSummary({ groups }: { groups: readonly Skupina[] }) {
+  return (
+    <div className="summary">
+      <div className="sumbar" aria-hidden="true">
+        {groups.map((g) => (
+          <i key={g.stav} className={`sb-${g.stav}`} style={{ flexGrow: g.ulohy.length }} />
+        ))}
+      </div>
+      <p className="sumleg">
+        {groups.map((g) => (
+          <span key={g.stav}>
+            <i className={`sb-${g.stav}`} />
+            {STAV_SKUPINA[g.stav]} <b>{g.ulohy.length}</b>
+          </span>
+        ))}
+      </p>
+    </div>
+  );
+}
+
+/** One state's tasks under a heading that folds them away; a long group shows only the first ones. */
+function TaskGroup({ group, finished }: { group: Skupina; finished: boolean }) {
+  const [open, setOpen] = useState(true);
+  const [all, setAll] = useState(false);
+  const { shown, collapsible } = listPreview(group.ulohy, NAHLAD_SKUPINY, all);
+  return (
+    <div className="tgroup">
+      <button type="button" className="tgroup-h" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <Icon name="right" className="chev" />
+        <i className={`sb-${group.stav}`} />
+        <span className="tgroup-t">{STAV_SKUPINA[group.stav]}</span>
+        <span className="cnt">{group.ulohy.length}</span>
+      </button>
+      {open && (
+        <>
+          <ul className="tasks">
+            {shown.map((u, i) => (
+              <TaskRow key={`${i}-${u.text}`} uloha={u} finished={finished} />
+            ))}
+          </ul>
+          {collapsible && <MoreButton open={all} total={group.ulohy.length} onToggle={() => setAll(!all)} />}
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Tasks of the sprint on the card: the summary on top, then the tasks grouped by state. */
+function TaskList({ ulohy, finished }: { ulohy: readonly Uloha[]; finished: boolean }) {
+  const groups = groupTasks(ulohy);
+  return (
+    <div className="tasklist">
+      <TaskSummary groups={groups} />
+      {groups.map((g) => (
+        <TaskGroup key={g.stav} group={g} finished={finished} />
+      ))}
+    </div>
+  );
+}
+
 /** How many rows a group of a finished sprint shows before the rest is opened. */
 const NAHLAD_VYSLEDKOV = 4;
 
@@ -409,8 +493,7 @@ const NAHLAD_VYSLEDKOV = 4;
  */
 function OutcomeList({ title, items, className }: { title: string; items: readonly Uloha[]; className?: string }) {
   const [open, setOpen] = useState(false);
-  const collapsible = items.length > NAHLAD_VYSLEDKOV + 1;
-  const shown = collapsible && !open ? items.slice(0, NAHLAD_VYSLEDKOV) : items;
+  const { shown, collapsible } = listPreview(items, NAHLAD_VYSLEDKOV, open);
   return (
     <div className={cx('out-g', className)}>
       <span className="lbl">{title}</span>
@@ -425,12 +508,7 @@ function OutcomeList({ title, items, className }: { title: string; items: readon
           </li>
         ))}
       </ul>
-      {collapsible && (
-        <button type="button" className="res-more" aria-expanded={open} onClick={() => setOpen(!open)}>
-          {open ? 'zobraziť menej' : `zobraziť všetky · ${items.length}`}
-          <Icon name="right" className="chev" />
-        </button>
-      )}
+      {collapsible && <MoreButton open={open} total={items.length} onToggle={() => setOpen(!open)} />}
     </div>
   );
 }

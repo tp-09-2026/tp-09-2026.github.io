@@ -4,6 +4,8 @@ import {
   calendarCells,
   currentSemester,
   focusSprint,
+  groupTasks,
+  listPreview,
   sprintsUpTo,
   semesterPosition,
   semesterSegments,
@@ -157,5 +159,33 @@ describe('taskFate', () => {
     expect(taskFate({ text: 'x', stav: 'rozpracovana' }, true)).toBe('nedokončená');
     expect(taskFate({ text: 'x', stav: 'rozpracovana' }, false)).toBeUndefined();
     expect(taskFate({ text: 'x', stav: 'hotova' }, true)).toBeUndefined();
+  });
+});
+
+describe('listPreview', () => {
+  const items = [1, 2, 3, 4, 5, 6, 7, 8];
+
+  it('shows only the first rows of a long list until it is opened', () => {
+    expect(listPreview(items, 6, false)).toEqual({ shown: [1, 2, 3, 4, 5, 6], collapsible: true });
+    expect(listPreview(items, 6, true)).toEqual({ shown: items, collapsible: true });
+  });
+
+  it('shows a list one row over the limit whole, without a button', () => {
+    expect(listPreview(items.slice(0, 7), 6, false)).toEqual({ shown: items.slice(0, 7), collapsible: false });
+    expect(listPreview([], 6, false)).toEqual({ shown: [], collapsible: false });
+  });
+});
+
+describe('groupTasks', () => {
+  it('groups tasks by state, in progress first and empty groups left out', () => {
+    const groups = groupTasks([
+      { text: 'a', stav: 'hotova' },
+      { text: 'b', stav: 'rozpracovana' },
+      { text: 'c', stav: 'hotova' },
+    ] as const);
+    expect(groups.map((g) => [g.stav, g.ulohy.map((u) => u.text)])).toEqual([
+      ['rozpracovana', ['b']],
+      ['hotova', ['a', 'c']],
+    ]);
   });
 });
