@@ -3,6 +3,8 @@ import type { Semester, Sprint } from '../content/types';
 import {
   calendarCells,
   currentSemester,
+  daysLabel,
+  daysLate,
   focusSprint,
   groupTasks,
   listPreview,
@@ -12,6 +14,7 @@ import {
   semesterWeek,
   semesterWeeks,
   sprintDay,
+  sprintDayLabel,
   sprintLength,
   sprintOutcome,
   sprintStatus,
@@ -56,6 +59,52 @@ describe('focusSprint', () => {
   });
   it('handles no sprints', () => {
     expect(focusSprint([], '2026-10-07')).toEqual({ kind: 'ziadny' });
+  });
+});
+
+describe('Jira state wins over the dates', () => {
+  // Sprint 2 planned until Sunday 15. 11., on Monday it is still open in Jira
+  const open: Sprint = { cislo: 2, od: '2026-11-02', do: '2026-11-15', jiraStav: 'active' };
+  const next: Sprint = { cislo: 3, od: '2026-11-16', do: '2026-11-29', jiraStav: 'future' };
+  const plan: Sprint = { cislo: 4, od: '2026-11-30', do: '2026-12-13' };
+  const all = [open, next, plan];
+
+  it('keeps a sprint open in Jira running after its last day', () => {
+    expect(sprintStatus(open, '2026-11-16', all)).toBe('prebieha');
+    expect(daysLate(open, '2026-11-16')).toBe(1);
+    expect(daysLate(open, '2026-11-10')).toBe(0);
+  });
+
+  it('does not start the next sprint before it is started in Jira', () => {
+    expect(sprintStatus(next, '2026-11-16', all)).toBe('planovany');
+    expect(focusSprint(all, '2026-11-16')).toEqual({ kind: 'prebieha', sprint: open });
+  });
+
+  it('keeps hand-planned sprints waiting behind an open Jira sprint', () => {
+    expect(sprintStatus(plan, '2026-12-01', all)).toBe('planovany');
+    expect(sprintStatus(plan, '2026-12-01', [plan])).toBe('prebieha');
+  });
+
+  it('ends a sprint when it is closed in Jira, even before its last day', () => {
+    const closed: Sprint = { ...open, jiraStav: 'closed' };
+    expect(sprintStatus(closed, '2026-11-14', [closed, next])).toBe('hotovy');
+    // the next one waits for its start in Jira although its planned start is behind us
+    expect(focusSprint([closed, next], '2026-11-17')).toEqual({ kind: 'medzi', sprint: next });
+  });
+
+  it('counts the days of a late sprint past its length', () => {
+    expect(sprintDayLabel(open, true, '2026-11-17')).toBe('deň 16 zo 14');
+    expect(sprintDayLabel(open, true, '2026-11-10')).toBe('deň 9 zo 14');
+    expect(sprintDayLabel(open, false, '2026-11-17')).toBe('14 dní');
+    expect([1, 2, 4, 5].map(daysLabel)).toEqual(['1 deň', '2 dni', '4 dni', '5 dní']);
+  });
+
+  it('runs the calendar on up to today and marks the late days', () => {
+    const cells = calendarCells(open, '2026-11-17', new Set(), '2026-11-17');
+    expect(cells).toHaveLength(21);
+    expect(cells.filter((c) => c.late).map((c) => c.iso)).toEqual(['2026-11-16', '2026-11-17']);
+    expect(cells.find((c) => c.iso === '2026-11-17')?.inSprint).toBe(true);
+    expect(cells.find((c) => c.iso === '2026-11-18')?.inSprint).toBe(false);
   });
 });
 

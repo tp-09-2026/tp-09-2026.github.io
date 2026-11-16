@@ -3,7 +3,7 @@ import { tim, uvod } from '../content/projekt';
 import { sprinty } from '../content/sprinty';
 import { isTodo, type Sprint } from '../content/types';
 import { formatDay, formatRange, type ISODate } from '../lib/dates';
-import { focusSprint, sprintDay, sprintLength, sprintNumber, type Focus } from '../lib/sprints';
+import { daysLabel, daysLate, focusSprint, sprintDay, sprintDayLabel, sprintLength, sprintNumber, type Focus } from '../lib/sprints';
 import { typo } from '../lib/typography';
 import { Icon } from './ui';
 import './Hero.css';
@@ -155,14 +155,14 @@ function SprintStack({ focus, dnes }: { focus: Exclude<Focus, { kind: 'ziadny' }
             <span className="tp-k mono up">
               Šprint {sprintNumber(sprint.cislo)} · {formatRange(sprint.od, sprint.do)}
             </span>
-            <StatusLabel focus={focus} />
+            <StatusLabel focus={focus} dnes={dnes} />
             <span className="tp-t">{sprint.nazov ? typo(sprint.nazov) : `Šprint ${sprint.cislo}`}</span>
             <TeaserText sprint={sprint} />
             <span className="tp-f">
               <span className="ticks-w">
                 <span className="ticks" style={{ '--n': length, '--k': day } as CSSProperties} />
               </span>
-              <span className="mono">{focus.kind === 'prebieha' ? `deň ${day} zo ${length}` : `${length} dní`}</span>
+              <span className="mono">{sprintDayLabel(sprint, focus.kind === 'prebieha', dnes)}</span>
             </span>
           </a>
         </div>
@@ -171,9 +171,14 @@ function SprintStack({ focus, dnes }: { focus: Exclude<Focus, { kind: 'ziadny' }
   );
 }
 
-export function StatusLabel({ focus }: { focus: Exclude<Focus, { kind: 'ziadny' }> }) {
-  if (focus.kind === 'prebieha') return <span className="live">prebieha</span>;
+export function StatusLabel({ focus, dnes }: { focus: Exclude<Focus, { kind: 'ziadny' }>; dnes: ISODate }) {
+  if (focus.kind === 'prebieha') {
+    const late = daysLate(focus.sprint, dnes);
+    return late > 0 ? <span className="live late">predĺžený o {daysLabel(late)}</span> : <span className="live">prebieha</span>;
+  }
   if (focus.kind === 'po') return <span className="chip ok">hotový</span>;
+  // the planned start is behind us, but the sprint has not been started in Jira yet
+  if (focus.sprint.od <= dnes) return <span className="chip">čaká na spustenie</span>;
   return <span className="chip">začína {formatDay(focus.sprint.od)}</span>;
 }
 

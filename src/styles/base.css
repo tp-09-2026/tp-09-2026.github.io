@@ -185,6 +185,12 @@ p {
     var(--glow);
   animation: pulse 2.6s ease-in-out infinite;
 }
+/* running past its planned end: the same label, only the dot turns orange */
+.live.late::before {
+  background: var(--late);
+  box-shadow: 0 0 0 3px var(--late-ring);
+  animation: none;
+}
 @keyframes pulse {
   50% {
     box-shadow:

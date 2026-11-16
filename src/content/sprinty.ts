@@ -1,6 +1,6 @@
 /**
- * Semester a šprinty. Stav šprintu (plánovaný / prebieha / hotový) sa počíta sám
- * z dátumov, netreba ho prepínať. Zápisnice a retrospektívy sa k šprintu priradia
+ * Semester a šprinty. Stav šprintu (plánovaný / prebieha / hotový) sa počíta sám,
+ * netreba ho prepínať: pri šprinte z Jiry podľa jeho stavu v Jire, inak z dátumov. Zápisnice a retrospektívy sa k šprintu priradia
  * podľa dátumu.
  *
  * Dátumy, cieľ a úlohy šprintov sa pri builde berú z Jiry (pozri jira.ts).

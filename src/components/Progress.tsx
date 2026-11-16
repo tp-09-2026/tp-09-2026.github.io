@@ -9,6 +9,8 @@ import { updatedLabel } from '../lib/jira';
 import {
   calendarCells,
   currentSemester,
+  daysLabel,
+  daysLate,
   focusSprint,
   groupTasks,
   listPreview,
@@ -17,6 +19,7 @@ import {
   semesterWeek,
   semesterWeeks,
   sprintDay,
+  sprintDayLabel,
   sprintsUpTo,
   sprintLength,
   sprintNumber,
@@ -107,7 +110,7 @@ function SemesterRuler({ dnes }: { dnes: ISODate }) {
                     <li key={seg.od} className="gap-seg" style={style} aria-hidden="true" />
                   );
                 }
-                const status = sprintStatus(seg.sprint, dnes);
+                const status = sprintStatus(seg.sprint, dnes, sprinty);
                 const progress = status === 'prebieha' ? (sprintDay(seg.sprint, dnes) / sprintLength(seg.sprint)) * 100 : 0;
                 return (
                   <li key={seg.od} className={cx(status === 'prebieha' && 'cur', status === 'hotovy' && 'done')} style={style}>
@@ -159,8 +162,10 @@ function CurrentSprint({
   const view: Exclude<Focus, { kind: 'ziadny' }> = isFocus ? focus : { kind: 'po', sprint };
   const length = sprintLength(sprint);
   const day = view.kind === 'prebieha' ? sprintDay(sprint, dnes) : view.kind === 'po' ? length : 0;
+  // still open in Jira after its planned last day: the calendar runs on up to today
+  const late = view.kind === 'prebieha' ? daysLate(sprint, dnes) : 0;
   const meetings = meetingDays(dokumenty);
-  const cells = calendarCells(sprint, dnes, meetings);
+  const cells = calendarCells(sprint, dnes, meetings, late > 0 ? dnes : sprint.do);
   const minutes = docsInSprint(sprint).filter((d) => d.kategoria === 'zapisnice');
 
   return (
@@ -193,7 +198,7 @@ function CurrentSprint({
               <span className="mono up">
                 Šprint {sprintNumber(sprint.cislo)} · {formatRange(sprint.od, sprint.do, true)}
               </span>
-              <StatusLabel focus={view} />
+              <StatusLabel focus={view} dnes={dnes} />
             </p>
             <h3 id="now-t">{sprint.nazov ? typo(sprint.nazov) : `Šprint ${sprint.cislo}`}</h3>
             <p className="goal">
@@ -206,6 +211,12 @@ function CurrentSprint({
                 typo(sprint.ciel)
               )}
             </p>
+            {late > 0 && (
+              <p className="goal">
+                <span className="lbl">Termín</span>
+                plánovaný koniec bol {formatDay(sprint.do)}, šprint ešte nie je uzavretý
+              </p>
+            )}
           </div>
         </div>
         <div className="now-body">
@@ -248,6 +259,7 @@ function CurrentSprint({
                     c.inSprint && !c.today && c.weekend && 'we',
                     c.inSprint && !c.today && !c.weekend && c.past && 'past',
                     c.inSprint && c.meeting && 'meet',
+                    c.late && 'late',
                   )}
                   aria-current={c.today ? 'date' : undefined}
                 >
@@ -268,12 +280,18 @@ function CurrentSprint({
                   dnes
                 </span>
               )}
+              {late > 0 && (
+                <span className="leg">
+                  <i className="leg-l" />
+                  predĺženie
+                </span>
+              )}
             </div>
             <div className="cal-prog">
               <span className="ticks-w">
                 <span className="ticks" style={{ '--n': length, '--k': day } as CSSProperties} />
               </span>
-              <span className="mono">{view.kind === 'prebieha' ? `deň ${day} zo ${length}` : `${length} dní`}</span>
+              <span className="mono">{sprintDayLabel(sprint, view.kind === 'prebieha', dnes)}</span>
             </div>
             {(sprint.jira !== undefined || minutes.length > 0) && (
               <div className="now-links">
@@ -519,8 +537,8 @@ function docsInSprint(sprint: Sprint): Dokument[] {
 
 function SprintLog({ dnes }: { dnes: ISODate }) {
   const sorted = [...sprinty].sort((a, b) => (a.od < b.od ? -1 : 1));
-  const done = sorted.filter((s) => sprintStatus(s, dnes) === 'hotovy');
-  const rest = sorted.filter((s) => sprintStatus(s, dnes) !== 'hotovy');
+  const done = sorted.filter((s) => sprintStatus(s, dnes, sorted) === 'hotovy');
+  const rest = sorted.filter((s) => sprintStatus(s, dnes, sorted) !== 'hotovy');
 
   return (
     <div className="log">
@@ -533,7 +551,8 @@ function SprintLog({ dnes }: { dnes: ISODate }) {
       {rest.length > 0 && (
         <div className="lg-row">
           {rest.map((s, index) => {
-            const status = sprintStatus(s, dnes);
+            const status = sprintStatus(s, dnes, sorted);
+            const late = status === 'prebieha' ? daysLate(s, dnes) : 0;
             const fill = status === 'prebieha' ? (sprintDay(s, dnes) / sprintLength(s)) * 100 : undefined;
             // the running sprint glows, the next one is outlined, later ones fade out
             const variant = status === 'prebieha' ? 'cur' : index <= 1 ? undefined : 'dim';
@@ -545,7 +564,15 @@ function SprintLog({ dnes }: { dnes: ISODate }) {
                     Šprint {sprintNumber(s.cislo)} · {formatRange(s.od, s.do)}
                   </span>
                 </p>
-                {status === 'prebieha' ? <span className="live">prebieha</span> : <span className="chip">plánovaný</span>}
+                {status === 'prebieha' ? (
+                  late > 0 ? (
+                    <span className="live late">predĺžený o {daysLabel(late)}</span>
+                  ) : (
+                    <span className="live">prebieha</span>
+                  )
+                ) : (
+                  <span className="chip">{s.od <= dnes ? 'čaká na spustenie' : 'plánovaný'}</span>
+                )}
                 {s.nazov && <h4>{typo(s.nazov)}</h4>}
                 {status === 'planovany' && !s.ciel && <p className="lg-goal">Cieľ doplníme na plánovaní šprintu.</p>}
               </article>

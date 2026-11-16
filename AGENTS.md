@@ -54,7 +54,12 @@ Zlý názov alebo neznámy priečinok zhodí `npm test`, takže sa nenasadí roz
 
 ### Šprinty a Jira
 
-- Stav šprintu (plánovaný / prebieha / hotový) sa **počíta z dátumov**, neprepína sa ručne.
+- Stav šprintu (plánovaný / prebieha / hotový) sa neprepína ručne:
+  - pri šprinte z Jiry rozhoduje **stav v Jire**, nie dátumy: hotový je až po uzavretí (Complete sprint),
+    začne až po spustení (Start sprint),
+  - šprint, ktorý je v Jire otvorený aj po plánovanom konci, sa ukáže ako **„predĺžený o N dní“**
+    (oranžová bodka pri stave, riadok „Termín“ pod cieľom, dni navyše v kalendári s oranžovým pásikom); ďalší šprint dovtedy „čaká na spustenie“,
+  - šprinty, ktoré sú len v `sprinty.ts`, idú podľa dátumov, ale nezačnú, kým je skorší šprint v Jire otvorený.
 - **Dátumy, cieľ a úlohy šprintov sa berú z Jiry** (board 1 projektu SCRUM, nastavenie v `src/content/jira.ts`):
   - GitHub Actions ich stiahne pri každom pushi a každé 3 hodiny (`npm run jira` → `src/content/jira-data.json`, necommituje sa).
   - Šprint z Jiry sa spáruje s ručným podľa čísla na konci názvu („SCRUM Sprint 0“ = šprint 0).

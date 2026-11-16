@@ -48,6 +48,9 @@
   --todo-fg: #b45309;
   --todo-bg: #fef3c7;
   --todo-bd: #f59e0b;
+  /* a sprint still open after its planned end: solid orange, unlike the dashed "doplníme" */
+  --late: #e8590c;
+  --late-ring: rgba(232, 89, 12, 0.2);
 
   /* hero mesh: luminous field with ink on top */
   --hx: #e3f3ee;
@@ -107,6 +110,8 @@ html.dark {
   --todo-fg: #fbbf24;
   --todo-bg: rgba(245, 158, 11, 0.12);
   --todo-bd: #f59e0b;
+  --late: #ff8a4c;
+  --late-ring: rgba(255, 138, 76, 0.22);
 
   --hx: #050807;
   --aa: 0.5;

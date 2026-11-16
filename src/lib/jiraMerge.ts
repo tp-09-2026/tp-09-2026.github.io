@@ -89,6 +89,7 @@ function fromJiraSprint(
     ulohy: hasTasks ? j.ulohy.map((u) => toUloha(u, numbers)) : manual?.ulohy,
     ulohyPoznamka: hasTasks ? undefined : manual?.ulohyPoznamka,
     ulohyZJiry: hasTasks,
+    jiraStav: j.stav,
   };
   const name = manual?.nazov ?? (isDefaultName(j.nazov) ? undefined : j.nazov);
   if (name) sprint.nazov = name;

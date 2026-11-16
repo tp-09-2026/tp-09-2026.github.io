@@ -76,6 +76,11 @@ export interface Sprint {
   ulohyPoznamka?: Todo;
   /** set automatically when the tasks come from Jira (do not write by hand) */
   ulohyZJiry?: boolean;
+  /**
+   * State of the sprint in Jira, set automatically (do not write by hand). It wins over
+   * the dates: a sprint still open in Jira after its last day is running late, not over.
+   */
+  jiraStav?: 'future' | 'active' | 'closed';
   /** what we actually delivered; without it a finished sprint lists its finished tasks */
   vysledky?: string[];
   /** link to the sprint (board or report) in Jira */

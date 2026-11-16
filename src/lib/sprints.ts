@@ -3,11 +3,47 @@ import { addDays, daysBetween, dayOfMonth, isWeekend, weekday, type ISODate } fr
 
 export type SprintStatus = 'hotovy' | 'prebieha' | 'planovany';
 
-/** ISO dates compare correctly as strings, so no Date objects are needed here. */
-export function sprintStatus(sprint: Pick<Sprint, 'od' | 'do'>, dnes: ISODate): SprintStatus {
+type SprintDates = Pick<Sprint, 'od' | 'do' | 'jiraStav'>;
+
+/**
+ * The state in Jira wins over the dates: a sprint is over only when it is closed in
+ * Jira and starts only when it is started there. So a sprint still open after its last
+ * day keeps running (late), and the next one waits for it instead of showing up empty.
+ *
+ * Sprints known only from sprinty.ts follow the dates, but never start while an
+ * earlier sprint is still open in Jira (`all` = every sprint on the page).
+ * ISO dates compare correctly as strings, so no Date objects are needed here.
+ */
+export function sprintStatus(sprint: SprintDates, dnes: ISODate, all: readonly SprintDates[] = []): SprintStatus {
+  if (sprint.jiraStav === 'closed') return 'hotovy';
+  if (sprint.jiraStav === 'active') return 'prebieha';
+  if (sprint.jiraStav === 'future') return 'planovany';
+  if (all.some((s) => s.od < sprint.od && (s.jiraStav === 'active' || s.jiraStav === 'future'))) return 'planovany';
   if (dnes < sprint.od) return 'planovany';
   if (dnes > sprint.do) return 'hotovy';
   return 'prebieha';
+}
+
+/** Days a running sprint is past its planned last day (0 = on time). */
+export function daysLate(sprint: Pick<Sprint, 'do'>, dnes: ISODate): number {
+  return dnes > sprint.do ? daysBetween(sprint.do, dnes) : 0;
+}
+
+/**
+ * "deň 10 zo 14" while the sprint runs, "14 dní" otherwise. A late sprint keeps
+ * counting past its length ("deň 15 zo 14"), so the delay is visible at a glance.
+ */
+export function sprintDayLabel(sprint: Pick<Sprint, 'od' | 'do'>, running: boolean, dnes: ISODate): string {
+  const length = sprintLength(sprint);
+  if (!running) return `${length} dní`;
+  return `deň ${sprintDay(sprint, dnes) + daysLate(sprint, dnes)} zo ${length}`;
+}
+
+/** "1 deň", "3 dni", "5 dní" */
+export function daysLabel(n: number): string {
+  if (n === 1) return '1 deň';
+  if (n >= 2 && n <= 4) return `${n} dni`;
+  return `${n} dní`;
 }
 
 export function sprintLength(sprint: Pick<Sprint, 'od' | 'do'>): number {
@@ -36,9 +72,10 @@ export type Focus =
 
 export function focusSprint(sprints: readonly Sprint[], dnes: ISODate): Focus {
   const sorted = [...sprints].sort((a, b) => (a.od < b.od ? -1 : 1));
-  const running = sorted.find((s) => sprintStatus(s, dnes) === 'prebieha');
+  const running = sorted.find((s) => sprintStatus(s, dnes, sorted) === 'prebieha');
   if (running) return { kind: 'prebieha', sprint: running };
-  const next = sorted.find((s) => s.od > dnes);
+  // the first sprint not started yet, even if its planned start is already behind us
+  const next = sorted.find((s) => sprintStatus(s, dnes, sorted) === 'planovany');
   const last = sorted[sorted.length - 1];
   if (next) return next === sorted[0] ? { kind: 'pred', sprint: next } : { kind: 'medzi', sprint: next };
   if (last) return { kind: 'po', sprint: last };
@@ -105,22 +142,31 @@ export interface CalendarCell {
   today: boolean;
   weekend: boolean;
   meeting: boolean;
+  /** after the planned last day, while the sprint is still open in Jira */
+  late: boolean;
 }
 
-/** Monday-to-Sunday weeks covering the whole sprint, ready for a 7-column grid. */
+/**
+ * Monday-to-Sunday weeks covering the whole sprint, ready for a 7-column grid.
+ * `end` reaches past the planned last day when the sprint runs late; those days are
+ * part of the sprint but marked `late`.
+ */
 export function calendarCells(
   sprint: Pick<Sprint, 'od' | 'do'>,
   dnes: ISODate,
   meetings: ReadonlySet<ISODate> = new Set(),
+  end: ISODate = sprint.do,
 ): CalendarCell[] {
+  const lastDay = end > sprint.do ? end : sprint.do;
   const first = addDays(sprint.od, -weekday(sprint.od));
-  const last = addDays(sprint.do, 6 - weekday(sprint.do));
+  const last = addDays(lastDay, 6 - weekday(lastDay));
   const cells: CalendarCell[] = [];
   for (let iso = first; iso <= last; iso = addDays(iso, 1)) {
     cells.push({
       iso,
       day: dayOfMonth(iso),
-      inSprint: sprint.od <= iso && iso <= sprint.do,
+      late: sprint.do < iso && iso <= lastDay,
+      inSprint: sprint.od <= iso && iso <= lastDay,
       past: iso < dnes,
       today: iso === dnes,
       weekend: isWeekend(iso),
