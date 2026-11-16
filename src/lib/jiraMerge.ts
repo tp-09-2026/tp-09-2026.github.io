@@ -94,5 +94,6 @@ function fromJiraSprint(
   const name = manual?.nazov ?? (isDefaultName(j.nazov) ? undefined : j.nazov);
   if (name) sprint.nazov = name;
   if (j.ciel) sprint.ciel = j.ciel;
+  if (j.uzavrety) sprint.uzavrety = j.uzavrety;
   return sprint;
 }

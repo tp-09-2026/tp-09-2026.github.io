@@ -129,6 +129,17 @@ describe('normalizeJira after a sprint is closed', () => {
     ]);
   });
 
+  it('closing on the day of the planned end is not late', () => {
+    expect(data.sprinty.find((s) => s.id === 1)?.uzavrety).toBeUndefined();
+  });
+
+  it('remembers the day a sprint was closed after its planned end', () => {
+    const late: RawSprint = { ...sprints[1]!, completeDate: '2026-10-21T08:00:00.000Z' };
+    const [s] = normalizeJira([late], {}, { podulohy: false }).sprinty;
+    expect(s).toMatchObject({ do: '2026-10-18', uzavrety: '2026-10-21' });
+    expect(mergeSprints([], { aktualizovane: '', sprinty: [s!] })[0]?.uzavrety).toBe('2026-10-21');
+  });
+
   it('turns the carried-over sprint ids into sprint numbers', () => {
     const merged = mergeSprints([], data);
     expect(merged.find((s) => s.cislo === 1)?.ulohy?.[1]).toEqual({ text: 'Frontend', stav: 'presunuta', presunutaDo: 2 });

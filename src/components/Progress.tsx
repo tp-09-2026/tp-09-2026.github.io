@@ -11,6 +11,7 @@ import {
   currentSemester,
   daysLabel,
   daysLate,
+  daysLateClosed,
   focusSprint,
   groupTasks,
   listPreview,
@@ -20,6 +21,7 @@ import {
   semesterWeeks,
   sprintDay,
   sprintDayLabel,
+  sprintEnd,
   sprintsUpTo,
   sprintLength,
   sprintNumber,
@@ -116,6 +118,7 @@ function SemesterRuler({ dnes }: { dnes: ISODate }) {
                   <li key={seg.od} className={cx(status === 'prebieha' && 'cur', status === 'hotovy' && 'done')} style={style}>
                     Šprint {seg.sprint.cislo}
                     {status === 'prebieha' && <i className="fill" style={{ width: `${progress}%` }} />}
+                    {seg.late !== undefined && <i className="late" style={{ width: `${(seg.late / seg.days) * 100}%` }} />}
                   </li>
                 );
               })}
@@ -164,8 +167,10 @@ function CurrentSprint({
   const day = view.kind === 'prebieha' ? sprintDay(sprint, dnes) : view.kind === 'po' ? length : 0;
   // still open in Jira after its planned last day: the calendar runs on up to today
   const late = view.kind === 'prebieha' ? daysLate(sprint, dnes) : 0;
+  // closed in Jira after its planned last day: the calendar shows the days it really ran
+  const closedLate = view.kind === 'po' ? daysLateClosed(sprint) : 0;
   const meetings = meetingDays(dokumenty);
-  const cells = calendarCells(sprint, dnes, meetings, late > 0 ? dnes : sprint.do);
+  const cells = calendarCells(sprint, dnes, meetings, late > 0 ? dnes : sprintEnd(sprint));
   const minutes = docsInSprint(sprint).filter((d) => d.kategoria === 'zapisnice');
 
   return (
@@ -215,6 +220,12 @@ function CurrentSprint({
               <p className="goal">
                 <span className="lbl">Termín</span>
                 plánovaný koniec bol {formatDay(sprint.do)}, šprint ešte nie je uzavretý
+              </p>
+            )}
+            {closedLate > 0 && (
+              <p className="goal">
+                <span className="lbl">Termín</span>
+                plánovaný koniec bol {formatDay(sprint.do)}, uzavretý {formatDay(sprintEnd(sprint))}, o {daysLabel(closedLate)} neskôr
               </p>
             )}
           </div>
@@ -280,7 +291,7 @@ function CurrentSprint({
                   dnes
                 </span>
               )}
-              {late > 0 && (
+              {(late > 0 || closedLate > 0) && (
                 <span className="leg">
                   <i className="leg-l" />
                   predĺženie
@@ -532,7 +543,7 @@ function OutcomeList({ title, items, className }: { title: string; items: readon
 }
 
 function docsInSprint(sprint: Sprint): Dokument[] {
-  return dokumenty.filter((d) => sprint.od <= d.datum && d.datum <= sprint.do);
+  return dokumenty.filter((d) => sprint.od <= d.datum && d.datum <= sprintEnd(sprint));
 }
 
 function SprintLog({ dnes }: { dnes: ISODate }) {
@@ -597,6 +608,7 @@ function cancelledNote(n: number): string {
 
 function DoneSprint({ sprint }: { sprint: Sprint }) {
   const { splnene, nesplnene, zrusene } = sprintOutcome(sprint);
+  const late = daysLateClosed(sprint);
   const planned = splnene.length + nesplnene.length;
   const docs = docsInSprint(sprint);
   return (
@@ -613,6 +625,11 @@ function DoneSprint({ sprint }: { sprint: Sprint }) {
             <Icon name="check" />
             hotový
           </span>
+          {late > 0 && (
+            <span className="late-info">
+              uzavretý {formatDay(sprintEnd(sprint))}, o {daysLabel(late)} neskôr
+            </span>
+          )}
         </p>
         <h4>{sprint.nazov ? typo(sprint.nazov) : `Šprint ${sprint.cislo}`}</h4>
         {sprint.ciel !== undefined && (

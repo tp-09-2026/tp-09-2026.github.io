@@ -59,6 +59,8 @@ Zlý názov alebo neznámy priečinok zhodí `npm test`, takže sa nenasadí roz
     začne až po spustení (Start sprint),
   - šprint, ktorý je v Jire otvorený aj po plánovanom konci, sa ukáže ako **„predĺžený o N dní“**
     (oranžová bodka pri stave, riadok „Termín“ pod cieľom, dni navyše v kalendári s oranžovým pásikom); ďalší šprint dovtedy „čaká na spustenie“,
+  - keď sa šprint v Jire uzavrie až po plánovanom konci, karta ukáže „uzavretý D. M., o N dní neskôr“
+    a na osi semestra sú tie dni súčasťou šprintu s oranžovým pásikom (nie prázdna medzera),
   - šprinty, ktoré sú len v `sprinty.ts`, idú podľa dátumov, ale nezačnú, kým je skorší šprint v Jire otvorený.
 - **Dátumy, cieľ a úlohy šprintov sa berú z Jiry** (board 1 projektu SCRUM, nastavenie v `src/content/jira.ts`):
   - GitHub Actions ich stiahne pri každom pushi a každé 3 hodiny (`npm run jira` → `src/content/jira-data.json`, necommituje sa).

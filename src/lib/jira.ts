@@ -62,6 +62,11 @@ export interface JiraSprint {
   od?: ISODate;
   do?: ISODate;
   ciel?: string;
+  /**
+   * Day the sprint was closed in Jira, only when that was a later day than its planned
+   * end; closing it at the meeting on the last day does not count as late.
+   */
+  uzavrety?: ISODate;
   ulohy: JiraUloha[];
 }
 
@@ -194,6 +199,9 @@ export function normalizeJira(
       if (s.startDate) sprint.od = localDay(s.startDate);
       if (s.startDate && s.endDate) sprint.do = lastSprintDay(s.startDate, s.endDate);
       if (s.goal?.trim()) sprint.ciel = s.goal.trim();
+      if (stav === 'closed' && s.completeDate && s.endDate && localDay(s.completeDate) > localDay(s.endDate)) {
+        sprint.uzavrety = localDay(s.completeDate);
+      }
       return sprint;
     }),
   };

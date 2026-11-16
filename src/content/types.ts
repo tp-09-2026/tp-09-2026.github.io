@@ -81,6 +81,8 @@ export interface Sprint {
    * the dates: a sprint still open in Jira after its last day is running late, not over.
    */
   jiraStav?: 'future' | 'active' | 'closed';
+  /** day the sprint was closed in Jira when it ran past its planned end, set automatically */
+  uzavrety?: ISODate;
   /** what we actually delivered; without it a finished sprint lists its finished tasks */
   vysledky?: string[];
   /** link to the sprint (board or report) in Jira */
