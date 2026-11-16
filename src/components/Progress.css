@@ -132,15 +132,6 @@
   background: var(--mline);
   box-shadow: var(--glow);
 }
-/* the days a sprint ran past its planned end, at the right end of its segment */
-.spr .late {
-  position: absolute;
-  z-index: 1;
-  right: 0;
-  bottom: 0;
-  height: 3px;
-  background: var(--late);
-}
 .spr .gap-seg {
   background: repeating-linear-gradient(-45deg, transparent 0 6px, var(--line) 6px 7px);
   color: var(--fg-3);
@@ -659,22 +650,6 @@ button.task-row[aria-expanded='true'] .chev {
   flex-wrap: wrap;
   gap: 10px 18px;
   margin-bottom: 14px;
-}
-.late-info {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--fg-2);
-  white-space: nowrap;
-}
-.late-info::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--late);
 }
 .lg-meta .mono {
   font-size: 13px;

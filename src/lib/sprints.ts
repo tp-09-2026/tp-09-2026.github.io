@@ -24,16 +24,6 @@ export function sprintStatus(sprint: SprintDates, dnes: ISODate, all: readonly S
   return 'prebieha';
 }
 
-/** Last day the sprint really ran: the day it was closed in Jira if that was late. */
-export function sprintEnd(sprint: Pick<Sprint, 'do' | 'uzavrety'>): ISODate {
-  return sprint.uzavrety && sprint.uzavrety > sprint.do ? sprint.uzavrety : sprint.do;
-}
-
-/** Days a closed sprint ran past its planned last day (0 = closed on time). */
-export function daysLateClosed(sprint: Pick<Sprint, 'do' | 'uzavrety'>): number {
-  return daysBetween(sprint.do, sprintEnd(sprint));
-}
-
 /** Days a running sprint is past its planned last day (0 = on time). */
 export function daysLate(sprint: Pick<Sprint, 'do'>, dnes: ISODate): number {
   return dnes > sprint.do ? daysBetween(sprint.do, dnes) : 0;
@@ -97,9 +87,8 @@ export function sprintsUpTo(sprints: readonly Sprint[], last: Sprint): Sprint[] 
   return [...sprints].filter((s) => s.od <= last.od).sort((a, b) => a.od.localeCompare(b.od));
 }
 
-/** The sprint a date belongs to, counting the days a late sprint really ran. */
 export function sprintForDate(sprints: readonly Sprint[], date: ISODate): Sprint | undefined {
-  return sprints.find((s) => s.od <= date && date <= sprintEnd(s));
+  return sprints.find((s) => s.od <= date && date <= s.do);
 }
 
 export interface SprintOutcome {
@@ -193,8 +182,6 @@ export interface SemesterSegment {
   od: ISODate;
   do: ISODate;
   days: number;
-  /** days at the end of a sprint segment after its planned last day (closed late) */
-  late?: number;
 }
 
 /** Splits the semester into sprint blocks and the gaps between them (for the ruler). */
@@ -204,21 +191,13 @@ export function semesterSegments(semester: Semester, sprints: readonly Sprint[])
     .sort((a, b) => (a.od < b.od ? -1 : 1));
   const segments: SemesterSegment[] = [];
   let cursor = semester.od;
-  inside.forEach((s, i) => {
-    const od = s.od < cursor ? cursor : s.od;
-    // a sprint closed late takes the extra days, but never the days of the next sprint
-    const next = inside[i + 1];
-    let end = sprintEnd(s);
-    if (next && end >= next.od) end = addDays(next.od, -1) < s.do ? s.do : addDays(next.od, -1);
-    if (end > semester.do) end = semester.do;
-    if (od > end) return;
+  for (const s of inside) {
+    const od = s.od < semester.od ? semester.od : s.od;
+    const end = s.do > semester.do ? semester.do : s.do;
     if (od > cursor) segments.push(gap(cursor, addDays(od, -1)));
-    const late = end > s.do ? daysBetween(s.do, end) : 0;
-    const segment: SemesterSegment = { kind: 'sprint', sprint: s, od, do: end, days: daysBetween(od, end) + 1 };
-    if (late > 0) segment.late = late;
-    segments.push(segment);
+    segments.push({ kind: 'sprint', sprint: s, od, do: end, days: daysBetween(od, end) + 1 });
     cursor = addDays(end, 1);
-  });
+  }
   if (cursor <= semester.do) segments.push(gap(cursor, semester.do));
   return segments;
 }

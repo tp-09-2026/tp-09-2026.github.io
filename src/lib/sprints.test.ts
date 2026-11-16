@@ -5,7 +5,6 @@ import {
   currentSemester,
   daysLabel,
   daysLate,
-  daysLateClosed,
   focusSprint,
   groupTasks,
   listPreview,
@@ -16,8 +15,6 @@ import {
   semesterWeeks,
   sprintDay,
   sprintDayLabel,
-  sprintEnd,
-  sprintForDate,
   sprintLength,
   sprintOutcome,
   sprintStatus,
@@ -108,41 +105,6 @@ describe('Jira state wins over the dates', () => {
     expect(cells.filter((c) => c.late).map((c) => c.iso)).toEqual(['2026-11-16', '2026-11-17']);
     expect(cells.find((c) => c.iso === '2026-11-17')?.inSprint).toBe(true);
     expect(cells.find((c) => c.iso === '2026-11-18')?.inSprint).toBe(false);
-  });
-});
-
-describe('a sprint closed late', () => {
-  // sprint 2 planned until 15. 11., closed in Jira on 18. 11.; sprint 3 started on 19. 11.
-  const closed: Sprint = { cislo: 2, od: '2026-11-02', do: '2026-11-15', jiraStav: 'closed', uzavrety: '2026-11-18' };
-  const next: Sprint = { cislo: 3, od: '2026-11-19', do: '2026-12-02', jiraStav: 'active' };
-  const zima: Semester = { nazov: 'ZS', kratky: 'Zimný', od: '2026-11-02', do: '2026-12-02' };
-
-  it('knows how many days it ran over', () => {
-    expect(sprintEnd(closed)).toBe('2026-11-18');
-    expect(daysLateClosed(closed)).toBe(3);
-    expect(daysLateClosed({ do: '2026-11-15' })).toBe(0);
-  });
-
-  it('keeps the extra days on the ruler instead of an empty gap', () => {
-    const segs = semesterSegments(zima, [next, closed]);
-    expect(segs.map((s) => [s.kind, s.od, s.do, s.late])).toEqual([
-      ['sprint', '2026-11-02', '2026-11-18', 3],
-      ['sprint', '2026-11-19', '2026-12-02', undefined],
-    ]);
-  });
-
-  it('never takes days of the next sprint', () => {
-    const early: Sprint = { ...next, od: '2026-11-17' };
-    const segs = semesterSegments(zima, [closed, early]);
-    expect(segs.map((s) => [s.od, s.do, s.late])).toEqual([
-      ['2026-11-02', '2026-11-16', 1],
-      ['2026-11-17', '2026-12-02', undefined],
-    ]);
-  });
-
-  it('owns the documents from its extra days', () => {
-    expect(sprintForDate([closed, next], '2026-11-16')).toBe(closed);
-    expect(sprintForDate([closed, next], '2026-11-19')).toBe(next);
   });
 });
 
